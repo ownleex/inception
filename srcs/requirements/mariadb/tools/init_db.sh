@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script d'initialisation MariaDB - Version finale et robuste
+# Script d'initialisation MariaDB - Version avec détection corrigée
 set -eo pipefail
 
 echo "=== DÉMARRAGE INITIALISATION MARIADB ==="
@@ -15,15 +15,22 @@ fi
 echo "Variables d'environnement OK:"
 echo "- Base de données: $MYSQL_DATABASE"
 echo "- Utilisateur: $MYSQL_USER"
-echo "- UID actuel: $(id)"
 
-# Vérifier si MariaDB est déjà initialisée
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-    echo "=== PREMIÈRE INITIALISATION ==="
+# Corriger les permissions avant tout
+chown -R mysql:mysql /var/lib/mysql
+chown -R mysql:mysql /var/run/mysqld
+chown -R mysql:mysql /var/log/mysql
+
+# Vérifier si notre configuration spécifique existe
+# Nous vérifions l'existence d'un fichier marqueur que nous créons
+if [ ! -f "/var/lib/mysql/.inception_initialized" ]; then
+    echo "=== CONFIGURATION INCEPTION NÉCESSAIRE ==="
     
-    # Initialiser la base de données MariaDB
-    echo "Initialisation de la structure de base..."
-    mysql_install_db --user=mysql --datadir=/var/lib/mysql --rpm --auth-root-authentication-method=normal
+    # Si la base MySQL n'existe pas du tout, l'initialiser
+    if [ ! -d "/var/lib/mysql/mysql" ]; then
+        echo "Initialisation de la structure de base..."
+        mysql_install_db --user=mysql --datadir=/var/lib/mysql --rpm --auth-root-authentication-method=normal
+    fi
     
     # Créer un fichier temporaire pour les commandes SQL
     tfile=$(mktemp)
@@ -55,13 +62,18 @@ CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\` CHARACTER SET utf8mb4 COLLAT
 
 -- Créer l'utilisateur WordPress
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'localhost' IDENTIFIED BY '${MYSQL_PASSWORD}';
+
+-- Accorder tous les privilèges sur la base WordPress
 GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
+GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'localhost';
 
 -- Appliquer les changements
 FLUSH PRIVILEGES;
 EOF
 
-    echo "=== CONFIGURATION INITIALE ==="
+    echo "=== CONFIGURATION INCEPTION ==="
+    echo "Application de la configuration SQL..."
     
     # Démarrer MariaDB en mode bootstrap et appliquer la configuration
     mysqld --user=mysql --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 < "$tfile"
@@ -69,18 +81,17 @@ EOF
     # Nettoyer le fichier temporaire
     rm -f "$tfile"
     
-    echo "=== INITIALISATION TERMINÉE ==="
+    # Créer le fichier marqueur pour indiquer que la configuration est terminée
+    touch /var/lib/mysql/.inception_initialized
+    chown mysql:mysql /var/lib/mysql/.inception_initialized
+    
+    echo "=== CONFIGURATION INCEPTION TERMINÉE AVEC SUCCÈS ==="
 else
-    echo "=== MARIADB DÉJÀ INITIALISÉE ==="
+    echo "=== CONFIGURATION INCEPTION DÉJÀ EFFECTUÉE ==="
 fi
 
 echo "=== DÉMARRAGE DE MARIADB ==="
 echo "Commande finale: $@"
-
-# Corriger les permissions avant démarrage
-chown -R mysql:mysql /var/lib/mysql
-chown -R mysql:mysql /var/run/mysqld
-chown -R mysql:mysql /var/log/mysql
 
 # Démarrer MariaDB avec les paramètres fournis
 echo "Démarrage du serveur MariaDB..."
