@@ -1,6 +1,6 @@
 # Variables
 COMPOSE_FILE	= ./srcs/docker-compose.yml
-DOCKER_COMPOSE	= docker compose
+DOCKER_COMPOSE	= docker-compose
 DATA_PATH		= /home/$(USER)/data
 
 # Couleurs
