@@ -15,6 +15,25 @@ services:
     expose:
       - "3306"
 
+  wordpress:
+    build:
+      context: ./requirements/wordpress
+    container_name: wordpress
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+    environment:
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - inception
+    expose:
+      - "9000"
+
 volumes:
   mariadb_data:
     driver: local
@@ -22,6 +41,13 @@ volumes:
       type: none
       o: bind
       device: /home/${USER}/data/mariadb
+      
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/wordpress
 
 networks:
   inception:
