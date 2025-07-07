@@ -1,0 +1,66 @@
+#
+# These groups are read by MariaDB server.
+# Use it for options that only the server (but not clients) should see
+
+# this is read by the standalone daemon and embedded servers
+[server]
+
+# this is only for the mysqld standalone daemon
+[mysqld]
+
+# Bind sur toutes les interfaces pour permettre les connexions depuis les autres containers
+bind-address = 0.0.0.0
+
+# Port par défaut
+port = 3306
+
+# Répertoire des données
+datadir = /var/lib/mysql
+
+# Répertoire pour le socket Unix
+socket = /var/run/mysqld/mysqld.sock
+
+# Fichier PID
+pid-file = /var/run/mysqld/mysqld.pid
+
+# Utilisateur sous lequel MariaDB s'exécute
+user = mysql
+
+# Logs
+log-error = /var/log/mysql/error.log
+
+# Configuration pour améliorer les performances
+max_connections = 100
+connect_timeout = 5
+wait_timeout = 600
+max_allowed_packet = 16M
+thread_cache_size = 128
+sort_buffer_size = 4M
+bulk_insert_buffer_size = 16M
+tmp_table_size = 32M
+max_heap_table_size = 32M
+
+# Configuration MyISAM
+myisam_recover_options = BACKUP
+key_buffer_size = 128M
+table_open_cache = 400
+myisam_sort_buffer_size = 512M
+concurrent_insert = 2
+read_buffer_size = 2M
+read_rnd_buffer_size = 1M
+
+# Configuration InnoDB
+default_table_type = InnoDB
+innodb_buffer_pool_size = 256M
+innodb_log_buffer_size = 8M
+innodb_file_per_table = 1
+innodb_open_files = 400
+innodb_io_capacity = 400
+innodb_flush_method = O_DIRECT
+
+# Désactiver le mode strict SQL pour éviter les problèmes avec WordPress
+sql_mode = ""
+
+# Configuration pour la sécurité
+skip_networking = false
+skip_name_resolve
