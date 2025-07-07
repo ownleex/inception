@@ -18,6 +18,16 @@ all:
 	@echo "$(GREEN)🚀 Lancement des services...$(NC)"
 	@docker-compose -f $(COMPOSE_FILE) up -d --build
 
+# Lancement simple
+up:
+	@echo "$(GREEN)🚀 Lancement des services...$(NC)"
+	@docker-compose -f $(COMPOSE_FILE) up -d
+
+# Arrêt
+down:
+	@echo "$(RED)🛑 Arrêt des services...$(NC)"
+	@docker-compose -f $(COMPOSE_FILE) down
+
 # Nettoyage des containers
 clean:
 	@echo "$(YELLOW)🧹 Nettoyage...$(NC)"
