@@ -29,6 +29,10 @@ user = mysql
 # Logs
 log-error = /var/log/mysql/error.log
 
+# IMPORTANT: Permettre les connexions localhost ET externes
+skip-networking = false
+skip-bind-address
+
 # Configuration pour améliorer les performances
 max_connections = 100
 connect_timeout = 5
@@ -61,6 +65,5 @@ innodb_flush_method = O_DIRECT
 # Désactiver le mode strict SQL pour éviter les problèmes avec WordPress
 sql_mode = ""
 
-# Configuration pour la sécurité
-skip_networking = false
+# Configuration pour la sécurité - MAIS permettre les connexions locales
 skip_name_resolve
