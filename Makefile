@@ -17,17 +17,19 @@ all: build
 # Création des répertoires et construction
 build:
 	@echo "$(YELLOW)📁 Création du répertoire MariaDB...$(NC)"
-	@mkdir -p $(DATA_PATH)/mariadb
+	@sudo mkdir -p $(DATA_PATH)/mariadb
+	@sudo chown -R $(USER):$(USER) $(DATA_PATH)
+	@chmod -R 755 $(DATA_PATH)
 	@echo "$(YELLOW)🔨 Construction et lancement de MariaDB...$(NC)"
 	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up --build -d mariadb
 	@echo "$(GREEN)✅ MariaDB lancé avec succès !$(NC)"
 	@echo "$(YELLOW)⏳ Attente du démarrage de MariaDB...$(NC)"
-	@for i in $(seq 1 30); do \
+	@for i in $$(seq 1 30); do \
 		if docker exec mariadb mysqladmin ping -u root --silent 2>/dev/null; then \
-			echo "$(GREEN)✅ MariaDB est prêt après $i secondes !$(NC)"; \
+			echo "$(GREEN)✅ MariaDB est prêt après $$i secondes !$(NC)"; \
 			break; \
 		fi; \
-		echo "Tentative $i/30..."; \
+		echo "Tentative $$i/30..."; \
 		sleep 2; \
 	done
 	@make test-mariadb
@@ -50,15 +52,17 @@ kill:
 # Nettoyage des containers et volumes Docker
 clean:
 	@echo "$(YELLOW)🧹 Nettoyage de MariaDB...$(NC)"
-	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down -v
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down -v --remove-orphans
 
-# Nettoyage complet (containers + données locales)
-fclean: clean
-	@echo "$(RED)🗑️  Suppression des données MariaDB...$(NC)"
-	@sudo rm -rf $(DATA_PATH)/mariadb
-	@echo "$(RED)🧽 Nettoyage complet du système Docker...$(NC)"
+# Nettoyage complet (containers + données locales + volumes Docker)
+fclean: 
+	@echo "$(RED)🗑️  Arrêt et suppression complète...$(NC)"
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down -v --remove-orphans 2>/dev/null || true
+	@echo "$(RED)🧽 Nettoyage des volumes Docker...$(NC)"
+	@docker volume prune -f
 	@docker system prune -a -f --volumes
-	@docker network prune -f
+	@echo "$(RED)🗂️  Suppression des données locales...$(NC)"
+	@sudo rm -rf $(DATA_PATH)
 	@echo "$(RED)⚠️  Nettoyage complet terminé !$(NC)"
 
 # Reconstruction complète
@@ -87,7 +91,7 @@ mysql:
 # Connexion MySQL avec utilisateur WordPress
 mysql-wp:
 	@echo "$(GREEN)🔐 Connexion MySQL avec utilisateur WordPress...$(NC)"
-	@docker exec -it mariadb mysql -u $(shell grep MYSQL_USER srcs/.env | cut -d '=' -f2) -p$(shell grep MYSQL_PASSWORD srcs/.env | cut -d '=' -f2)
+	@docker exec -it mariadb mysql -u $$(grep MYSQL_USER srcs/.env | cut -d '=' -f2) -p$$(grep MYSQL_PASSWORD srcs/.env | cut -d '=' -f2)
 
 # Test complet de MariaDB
 test-mariadb:
@@ -96,56 +100,35 @@ test-mariadb:
 	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) ps mariadb
 	@echo ""
 	@echo "$(YELLOW)🔌 Test de connexion avec root:$(NC)"
-	@docker exec mariadb mysql -u root -p$(shell grep MYSQL_ROOT_PASSWORD srcs/.env | cut -d '=' -f2) -e "SELECT 'Connexion root OK' as Status;" 2>/dev/null && echo "$(GREEN)✅ Connexion root réussie$(NC)" || echo "$(RED)❌ Échec connexion root$(NC)"
+	@docker exec mariadb mysql -u root -p$$(grep MYSQL_ROOT_PASSWORD srcs/.env | cut -d '=' -f2) -e "SELECT 'Connexion root OK' as Status;" 2>/dev/null && echo "$(GREEN)✅ Connexion root réussie$(NC)" || echo "$(RED)❌ Échec connexion root$(NC)"
 	@echo ""
 	@echo "$(YELLOW)🔌 Test de connexion utilisateur WordPress:$(NC)"
-	@docker exec mariadb mysql -u $(shell grep MYSQL_USER srcs/.env | cut -d '=' -f2) -p$(shell grep MYSQL_PASSWORD srcs/.env | cut -d '=' -f2) -e "SELECT 'Connexion WordPress OK' as Status;" 2>/dev/null && echo "$(GREEN)✅ Connexion WordPress réussie$(NC)" || echo "$(RED)❌ Échec connexion WordPress$(NC)"
+	@docker exec mariadb mysql -u $$(grep MYSQL_USER srcs/.env | cut -d '=' -f2) -p$$(grep MYSQL_PASSWORD srcs/.env | cut -d '=' -f2) -e "SELECT 'Connexion WordPress OK' as Status;" 2>/dev/null && echo "$(GREEN)✅ Connexion WordPress réussie$(NC)" || echo "$(RED)❌ Échec connexion WordPress$(NC)"
 	@echo ""
 	@echo "$(YELLOW)🗄️  Bases de données disponibles:$(NC)"
-	@docker exec mariadb mysql -u root -p$(shell grep MYSQL_ROOT_PASSWORD srcs/.env | cut -d '=' -f2) -e "SHOW DATABASES;" 2>/dev/null || echo "$(RED)❌ Impossible d'afficher les bases$(NC)"
+	@docker exec mariadb mysql -u root -p$$(grep MYSQL_ROOT_PASSWORD srcs/.env | cut -d '=' -f2) -e "SHOW DATABASES;" 2>/dev/null || echo "$(RED)❌ Impossible d'afficher les bases$(NC)"
 	@echo ""
 	@echo "$(YELLOW)👥 Utilisateurs MySQL:$(NC)"
-	@docker exec mariadb mysql -u root -p$(shell grep MYSQL_ROOT_PASSWORD srcs/.env | cut -d '=' -f2) -e "SELECT User, Host FROM mysql.user;" 2>/dev/null || echo "$(RED)❌ Impossible d'afficher les utilisateurs$(NC)"
+	@docker exec mariadb mysql -u root -p$$(grep MYSQL_ROOT_PASSWORD srcs/.env | cut -d '=' -f2) -e "SELECT User, Host FROM mysql.user;" 2>/dev/null || echo "$(RED)❌ Impossible d'afficher les utilisateurs$(NC)"
 
 # Test de performance MariaDB
 test-perf:
 	@echo "$(GREEN)⚡ Test de performance MariaDB...$(NC)"
-	@docker exec mariadb mysql -u root -p$(shell grep MYSQL_ROOT_PASSWORD srcs/.env | cut -d '=' -f2) -e "SELECT BENCHMARK(1000000, MD5('test'));" 2>/dev/null && echo "$(GREEN)✅ Test de performance OK$(NC)" || echo "$(RED)❌ Échec test de performance$(NC)"
+	@docker exec mariadb mysql -u root -p$$(grep MYSQL_ROOT_PASSWORD srcs/.env | cut -d '=' -f2) -e "SELECT BENCHMARK(1000000, MD5('test'));" 2>/dev/null && echo "$(GREEN)✅ Test de performance OK$(NC)" || echo "$(RED)❌ Échec test de performance$(NC)"
 
 # Redémarrage rapide
 restart: down up
 
-# Test de connexion directe sans authentification
-test-direct:
-	@echo "$(GREEN)🔍 Test de connexion directe...$(NC)"
-	@echo "$(YELLOW)1. Test socket Unix:$(NC)"
-	@docker exec mariadb mysql -u root --socket=/var/run/mysqld/mysqld.sock -e "SELECT 'Socket OK' as Test;" 2>/dev/null && echo "$(GREEN)✅ Socket OK$(NC)" || echo "$(RED)❌ Socket KO$(NC)"
-	@echo "$(YELLOW)2. Test sans mot de passe:$(NC)"
-	@docker exec mariadb mysql -u root -e "SELECT 'No password OK' as Test;" 2>/dev/null && echo "$(GREEN)✅ Pas de mot de passe$(NC)" || echo "$(RED)❌ Mot de passe requis$(NC)"
-	@echo "$(YELLOW)3. Liste des utilisateurs actuels:$(NC)"
-	@docker exec mariadb mysql -u root --socket=/var/run/mysqld/mysqld.sock -e "SELECT User, Host, authentication_string FROM mysql.user;" 2>/dev/null || echo "$(RED)❌ Impossible de lister$(NC)"
+# Diagnostic Docker
+docker-info:
+	@echo "$(GREEN)🔍 Diagnostic Docker...$(NC)"
+	@echo "$(YELLOW)Volumes Docker:$(NC)"
+	@docker volume ls | grep mariadb || echo "Aucun volume mariadb trouvé"
+	@echo "$(YELLOW)Images Docker:$(NC)"
+	@docker images | grep mariadb || echo "Aucune image mariadb trouvée"
+	@echo "$(YELLOW)Containers Docker:$(NC)"
+	@docker ps -a | grep mariadb || echo "Aucun container mariadb trouvé"
 
-# Debug avancé
-debug-init:
-	@echo "$(GREEN)🔍 Debug du script d'initialisation...$(NC)"
-	@echo "$(YELLOW)1. Contenu du répertoire MySQL:$(NC)"
-	@docker exec mariadb ls -la /var/lib/mysql/
-	@echo "$(YELLOW)2. Processus MySQL:$(NC)"
-	@docker exec mariadb ps aux | grep mysql
-	@echo "$(YELLOW)3. Ports en écoute:$(NC)"
-	@docker exec mariadb netstat -tlnp | grep 3306
-	@echo "$(YELLOW)4. Tentative de réinitialisation manuelle:$(NC)"
-	@docker exec mariadb bash -c "cd /var/lib/mysql && ls -la"
-
-# Force la réinitialisation
-force-reinit:
-	@echo "$(RED)🔄 Réinitialisation forcée...$(NC)"
-	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down -v
-	@echo "$(YELLOW)Suppression des données via Docker...$(NC)"
-	@docker run --rm -v $(DATA_PATH):/data alpine sh -c "rm -rf /data/mariadb/*" || sudo rm -rf $(DATA_PATH)/mariadb
-	@mkdir -p $(DATA_PATH)/mariadb
-	@echo "$(YELLOW)Reconstruction...$(NC)"
-	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up --build -d mariadb
 help:
 	@echo "$(GREEN)=== COMMANDES MARIADB ===$(NC)"
 	@echo "$(YELLOW)make$(NC) ou $(YELLOW)make all$(NC)        - Construction et lancement MariaDB"
@@ -161,6 +144,7 @@ help:
 	@echo "$(YELLOW)make mysql-wp$(NC)           - Connexion MySQL utilisateur WordPress"
 	@echo "$(YELLOW)make test-mariadb$(NC)       - Test complet de MariaDB"
 	@echo "$(YELLOW)make test-perf$(NC)          - Test de performance"
+	@echo "$(YELLOW)make docker-info$(NC)        - Diagnostic Docker"
 	@echo "$(YELLOW)make clean$(NC)              - Nettoyage containers et volumes"
 	@echo "$(YELLOW)make fclean$(NC)             - Nettoyage complet (⚠️  supprime tout)"
 	@echo "$(YELLOW)make re$(NC)                 - Reconstruction complète"
