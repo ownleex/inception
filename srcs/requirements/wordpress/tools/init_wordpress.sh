@@ -1,11 +1,12 @@
 #!/bin/bash
 
-# Attendre que la base de données soit prête
-echo "Attente de la base de données..."
-while ! nc -z $WORDPRESS_DB_HOST 3306; do
-    sleep 1
+# Attendre que MariaDB soit prêt (méthode TCP qui fonctionne)
+echo "Attente de MariaDB..."
+while ! timeout 1 bash -c '</dev/tcp/mariadb/3306'; do
+    echo "En attente de la base de données..."
+    sleep 2
 done
-echo "Base de données accessible"
+echo "MariaDB est accessible"
 
 # Configuration de WordPress si pas déjà fait
 if [ ! -f /var/www/html/wp-config.php ]; then

@@ -10,7 +10,8 @@ RUN apt update -y && apt upgrade -y && \
     php7.4-xml \
     php7.4-mbstring \
     php7.4-zip \
-    curl && \
+    curl \
+    mariadb-client && \
     rm -rf /var/lib/apt/lists/*
 
 # Téléchargement et installation de WordPress
