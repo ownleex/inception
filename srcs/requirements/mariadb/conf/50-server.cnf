@@ -2,7 +2,6 @@
 # Configuration de base
 datadir = /var/lib/mysql
 socket = /var/run/mysqld/mysqld.sock
-pid-file = /var/run/mysqld/mysqld.pid
 
 # Réseau
 bind-address = 0.0.0.0
@@ -10,16 +9,3 @@ port = 3306
 
 # Utilisateur
 user = mysql
-
-# Logs essentiels uniquement
-log-error = /var/log/mysql/error.log
-
-# Charset
-character-set-server = utf8mb4
-collation-server = utf8mb4_unicode_ci
-
-# Sécurité de base
-skip-name-resolve = 1
-
-[client]
-default-character-set = utf8mb4
