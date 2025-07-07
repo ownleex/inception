@@ -22,7 +22,14 @@ build:
 	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up --build -d mariadb
 	@echo "$(GREEN)✅ MariaDB lancé avec succès !$(NC)"
 	@echo "$(YELLOW)⏳ Attente du démarrage de MariaDB...$(NC)"
-	@sleep 10
+	@for i in $(seq 1 30); do \
+		if docker exec mariadb mysqladmin ping -u root --silent 2>/dev/null; then \
+			echo "$(GREEN)✅ MariaDB est prêt après $i secondes !$(NC)"; \
+			break; \
+		fi; \
+		echo "Tentative $i/30..."; \
+		sleep 2; \
+	done
 	@make test-mariadb
 
 # Lancement simple de MariaDB (sans rebuild)
@@ -108,7 +115,37 @@ test-perf:
 # Redémarrage rapide
 restart: down up
 
-# Aide spécifique MariaDB
+# Test de connexion directe sans authentification
+test-direct:
+	@echo "$(GREEN)🔍 Test de connexion directe...$(NC)"
+	@echo "$(YELLOW)1. Test socket Unix:$(NC)"
+	@docker exec mariadb mysql -u root --socket=/var/run/mysqld/mysqld.sock -e "SELECT 'Socket OK' as Test;" 2>/dev/null && echo "$(GREEN)✅ Socket OK$(NC)" || echo "$(RED)❌ Socket KO$(NC)"
+	@echo "$(YELLOW)2. Test sans mot de passe:$(NC)"
+	@docker exec mariadb mysql -u root -e "SELECT 'No password OK' as Test;" 2>/dev/null && echo "$(GREEN)✅ Pas de mot de passe$(NC)" || echo "$(RED)❌ Mot de passe requis$(NC)"
+	@echo "$(YELLOW)3. Liste des utilisateurs actuels:$(NC)"
+	@docker exec mariadb mysql -u root --socket=/var/run/mysqld/mysqld.sock -e "SELECT User, Host, authentication_string FROM mysql.user;" 2>/dev/null || echo "$(RED)❌ Impossible de lister$(NC)"
+
+# Debug avancé
+debug-init:
+	@echo "$(GREEN)🔍 Debug du script d'initialisation...$(NC)"
+	@echo "$(YELLOW)1. Contenu du répertoire MySQL:$(NC)"
+	@docker exec mariadb ls -la /var/lib/mysql/
+	@echo "$(YELLOW)2. Processus MySQL:$(NC)"
+	@docker exec mariadb ps aux | grep mysql
+	@echo "$(YELLOW)3. Ports en écoute:$(NC)"
+	@docker exec mariadb netstat -tlnp | grep 3306
+	@echo "$(YELLOW)4. Tentative de réinitialisation manuelle:$(NC)"
+	@docker exec mariadb bash -c "cd /var/lib/mysql && ls -la"
+
+# Force la réinitialisation
+force-reinit:
+	@echo "$(RED)🔄 Réinitialisation forcée...$(NC)"
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down -v
+	@echo "$(YELLOW)Suppression des données via Docker...$(NC)"
+	@docker run --rm -v $(DATA_PATH):/data alpine sh -c "rm -rf /data/mariadb/*" || sudo rm -rf $(DATA_PATH)/mariadb
+	@mkdir -p $(DATA_PATH)/mariadb
+	@echo "$(YELLOW)Reconstruction...$(NC)"
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up --build -d mariadb
 help:
 	@echo "$(GREEN)=== COMMANDES MARIADB ===$(NC)"
 	@echo "$(YELLOW)make$(NC) ou $(YELLOW)make all$(NC)        - Construction et lancement MariaDB"
