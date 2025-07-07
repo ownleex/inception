@@ -55,7 +55,7 @@ clean:
 # Nettoyage complet (containers + données locales)
 fclean: clean
 	@echo "$(RED)🗑️  Suppression des données MariaDB...$(NC)"
-	@rm -rf $(DATA_PATH)/mariadb
+	@sudo rm -rf $(DATA_PATH)/mariadb
 	@echo "$(RED)🧽 Nettoyage complet du système Docker...$(NC)"
 	@docker system prune -a -f --volumes
 	@docker network prune -f

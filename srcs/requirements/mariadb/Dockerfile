@@ -7,17 +7,20 @@ RUN apt-get update && apt-get install -y \
     mariadb-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Création du répertoire pour les données MariaDB et ajustement des permissions
+# Création des répertoires nécessaires avec les bonnes permissions
 RUN mkdir -p /var/run/mysqld \
+    && mkdir -p /var/log/mysql \
     && chown -R mysql:mysql /var/run/mysqld \
-    && chown -R mysql:mysql /var/lib/mysql
+    && chown -R mysql:mysql /var/lib/mysql \
+    && chown -R mysql:mysql /var/log/mysql \
+    && chmod 755 /var/run/mysqld
 
 # Copie du script d'initialisation
 COPY tools/init_db.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/init_db.sh
 
-# Copie de la configuration MariaDB
-COPY conf/50-server.cnf /etc/my.cnf.d/
+# Copie de la configuration MariaDB dans le bon répertoire
+COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
 
 # Exposition du port MariaDB
 EXPOSE 3306
@@ -29,4 +32,4 @@ USER mysql
 ENTRYPOINT ["init_db.sh"]
 
 # Commande par défaut
-CMD ["mysqld", "--user=mysql", "--console"]
+CMD ["mysqld", "--user=mysql"]
