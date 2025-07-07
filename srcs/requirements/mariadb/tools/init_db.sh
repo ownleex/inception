@@ -1,61 +1,54 @@
 #!/bin/bash
 
-# Script d'initialisation MariaDB corrigé
-set -e
+echo "=== INITIALISATION MARIADB SIMPLIFIÉE ==="
 
-echo "=== INITIALISATION MARIADB ==="
+# Configuration des permissions de base
+chown -R mysql:mysql /var/lib/mysql
+mkdir -p /var/run/mysqld
+chown -R mysql:mysql /var/run/mysqld
 
-# Vérification des variables d'environnement requises
-if [ -z "$MYSQL_ROOT_PASSWORD" ] || [ -z "$MYSQL_DATABASE" ] || [ -z "$MYSQL_USER" ] || [ -z "$MYSQL_PASSWORD" ]; then
-    echo "ERREUR: Variables d'environnement manquantes"
-    exit 1
-fi
-
-# Permissions de base
-echo "Configuration des permissions..."
-chown -R mysql:mysql /var/lib/mysql /var/run/mysqld /var/log/mysql
-chmod 755 /var/run/mysqld
-
-# Vérifier si la base est déjà initialisée
+# Initialiser la base de données si nécessaire
 if [ ! -d "/var/lib/mysql/mysql" ]; then
-    echo "Première initialisation de la base MySQL..."
-    
-    # Initialiser la base de données
-    mysql_install_db --user=mysql --datadir=/var/lib/mysql --rpm --auth-root-authentication-method=normal
-    
-    # Créer un fichier temporaire pour l'initialisation
-    tfile=`mktemp`
-    if [ ! -f "$tfile" ]; then
-        return 1
-    fi
-
-    cat << EOF > $tfile
-USE mysql;
-FLUSH PRIVILEGES;
-DELETE FROM mysql.user WHERE User='';
-DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
-ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
-GRANT ALL ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
-GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}' WITH GRANT OPTION;
-DROP DATABASE IF EXISTS test;
-FLUSH PRIVILEGES;
-CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE} CHARACTER SET utf8 COLLATE utf8_general_ci;
-CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';
-FLUSH PRIVILEGES;
-EOF
-
-    # Appliquer la configuration d'initialisation
-    echo "Application de la configuration initiale..."
-    mysqld --user=mysql --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 < $tfile
-    rm -f $tfile
-    
-    echo "Initialisation terminée avec succès."
-else
-    echo "Base de données déjà initialisée, démarrage direct..."
+    echo "Initialisation de la base de données..."
+    mysql_install_db --user=mysql --datadir=/var/lib/mysql > /dev/null
 fi
 
-echo "=== MARIADB PRÊT À DÉMARRER ==="
+# Démarrer MySQL en arrière-plan
+echo "Démarrage de MySQL..."
+mysqld_safe --user=mysql --datadir=/var/lib/mysql &
 
-# Démarrer MariaDB en premier plan avec la configuration finale
-exec mysqld --user=mysql --console --log-error=/var/log/mysql/error.log
+# Attendre que MySQL soit prêt
+echo "Attente de la disponibilité de MySQL..."
+while ! mysqladmin ping --silent; do
+    echo "MySQL n'est pas encore prêt, attente..."
+    sleep 1
+done
+
+echo "MySQL est en ligne !"
+
+# Configuration de la base de données et des utilisateurs
+if [ -n "$MYSQL_DATABASE" ]; then
+    echo "Création de la base de données: $MYSQL_DATABASE"
+    mysql -u root -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;"
+    
+    if [ -n "$MYSQL_USER" ] && [ -n "$MYSQL_PASSWORD" ]; then
+        echo "Création de l'utilisateur: $MYSQL_USER"
+        mysql -u root -e "CREATE USER IF NOT EXISTS \`${MYSQL_USER}\`@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"
+        mysql -u root -e "GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO \`${MYSQL_USER}\`@'%';"
+        mysql -u root -e "FLUSH PRIVILEGES;"
+        echo "Utilisateur $MYSQL_USER créé avec succès"
+    fi
+fi
+
+# Définir le mot de passe root si spécifié
+if [ -n "$MYSQL_ROOT_PASSWORD" ]; then
+    echo "Configuration du mot de passe root..."
+    mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
+    mysql -u root -e "GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}' WITH GRANT OPTION;"
+    mysql -u root -e "FLUSH PRIVILEGES;"
+fi
+
+echo "=== MARIADB PRÊT ==="
+
+# Maintenir le processus actif
+wait
