@@ -2,8 +2,7 @@ FROM debian:bullseye
 
 # Installation de MariaDB
 RUN apt update -y && apt upgrade -y && \
-    apt install mariadb-server -y && \
-    rm -rf /var/lib/apt/lists/*
+    apt install mariadb-server -y 
 
 # Copie de la configuration et du script
 COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
