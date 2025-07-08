@@ -24,7 +24,7 @@ wp core install --allow-root --path=$WP_PATHWORDPRESS --url=$DOMAIN --title=$WP_
 wp user create --allow-root $WP_USER $WP_USEREMAIL --path=$WP_PATHWORDPRESS --role=$WP_ROLE --user_pass=$WP_USERPASSWORD --display_name=$WP_DISPLAYNAME
 
 
-wp option update home "http://localhost" --path=/var/www/wordpress --allow-root
-wp option update siteurl "http://localhost" --path=/var/www/wordpress --allow-root
+wp option update home "http://$DOMAIN" --path=/var/www/wordpress --allow-root
+wp option update siteurl "http://$DOMAIN" --path=/var/www/wordpress --allow-root
 
 /usr/sbin/php-fpm7.4 -F
