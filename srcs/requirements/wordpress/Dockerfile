@@ -1,13 +1,21 @@
 FROM debian:bullseye
 
-# Installation de PHP et WordPress
+# Installation de PHP, WordPress et outils nécessaires
 RUN apt update -y && apt upgrade -y && \
     apt install -y \
     php7.4-fpm \
     php7.4-mysql \
+    php7.4-curl \
+    php7.4-gd \
+    php7.4-mbstring \
+    php7.4-xml \
+    php7.4-zip \
     curl \
     mariadb-client && \
     rm -rf /var/lib/apt/lists/*
+
+# Configuration de PHP-FPM pour les logs
+RUN mkdir -p /var/log && touch /var/log/php7.4-fpm.log
 
 # Téléchargement et installation de WordPress
 WORKDIR /var/www/html
