@@ -7,10 +7,10 @@ all : add-host
 	@sudo mkdir -p $(VOLPATH)/wordpress
 	@sudo chmod 777 $(VOLPATH)/mariadb
 	@sudo chmod 777 $(VOLPATH)/wordpress
-	@sudo docker compose -f $(DOCKPATH) up -d
+	@sudo docker-compose -f $(DOCKPATH) up -d
 
 clean : remove-host
-	@sudo docker compose -f ./srcs/docker-compose.yml down -v
+	@sudo docker-compose -f ./srcs/docker-compose.yml down -v
 	@sudo rm -rf $(VOLPATH)/mariadb
 	@sudo rm -rf $(VOLPATH)/wordpress
 
