@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Database Service (MariaDB)
   mariadb:
-    image: mariadb:sdiouane
+    image: mariadb:ayarmaya
     container_name: mariadb
     build: ./requirements/mariadb
     volumes:
@@ -17,7 +17,7 @@ services:
   # Web Server (Nginx)
   nginx:
     container_name: nginx
-    image: nginx:sdiouane
+    image: nginx:ayarmaya
     build: ./requirements/nginx
     ports:
       - "443:443"
@@ -33,7 +33,7 @@ services:
 
   # WordPress Service
   wordpress:
-    image: wordpress:sdiouane
+    image: wordpress:ayarmaya
     container_name: wordpress
     build: ./requirements/wordpress
     depends_on:
@@ -48,7 +48,7 @@ services:
 
   # Cache Service (Redis)
   redis:
-    image: redis:sdiouane
+    image: redis:ayarmaya
     build: ./requirements/bonus/redis
     container_name: redis
     restart: on-failure
@@ -60,7 +60,7 @@ services:
 
   # Adminer Service (Database Management Tool)
   adminer:
-    image: adminer:sdiouane
+    image: adminer:ayarmaya
     container_name: adminer
     build:
       ./requirements/bonus/adminer
@@ -76,7 +76,7 @@ services:
 
   # Static Site Service
   static_site:
-    image: static_site:sdiouane
+    image: static_site:ayarmaya
     container_name: static_site
     build:
       ./requirements/bonus/static_site
@@ -88,7 +88,7 @@ services:
 
   # Portainer Service (Docker Management Tool)
   service:
-    image: service:sdiouane
+    image: service:ayarmaya
     container_name: service
     build:
       context: ./requirements/bonus/service
@@ -102,7 +102,7 @@ services:
 
   # Ftp 
   ftp:
-    image: ftp:sdiouane
+    image: ftp:ayarmaya
     build: ./requirements/bonus/ftp
     container_name: ftp
     ports:
@@ -123,14 +123,14 @@ volumes:
   mariadb:
     driver: local
     driver_opts:
-      device: /home/sdiouane/data/mariadb
+      device: /home/ayarmaya/data/mariadb
       type: none
       o: bind
 
   wordpress:
     driver: local
     driver_opts:
-      device: /home/sdiouane/data/wordpress
+      device: /home/ayarmaya/data/wordpress
       type: none
       o: bind
 

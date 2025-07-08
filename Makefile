@@ -8,8 +8,8 @@ clean:
 
 fclean: clean
 	docker system prune -af --volumes
-	sudo rm -rf /home/sdiouane/data/mariadb
-	sudo rm -rf /home/sdiouane/data/wordpress
+	sudo rm -rf /home/ayarmaya/data/mariadb
+	sudo rm -rf /home/ayarmaya/data/wordpress
 
 re: fclean all
 
