@@ -19,9 +19,19 @@ until wp db check --allow-root --path=/var/www/wordpress; do
     echo "Retrying..."
 done
 
-wp core install --allow-root --path=$WP_PATHWORDPRESS --url=$DOMAIN --title=$WP_TITLE --admin_user=$WP_ADMINUSER --admin_password=$WP_ADMINPASSWORD --admin_email=$WP_ADMINEMAIL
+wp core install --allow-root \
+				--path=$WP_PATHWORDPRESS \
+				--url=$DOMAIN \
+				--title=$WP_TITLE \
+				--admin_user=$WP_ADMINUSER \
+				--admin_password=$WP_ADMINPASSWORD \
+				--admin_email=$WP_ADMINEMAIL
 
-wp user create --allow-root $WP_USER $WP_USEREMAIL --path=$WP_PATHWORDPRESS --role=$WP_ROLE --user_pass=$WP_USERPASSWORD --display_name=$WP_DISPLAYNAME
+wp user create --allow-root $WP_USER $WP_USEREMAIL \
+			   --path=$WP_PATHWORDPRESS \
+			   --role=$WP_ROLE \
+			   --user_pass=$WP_USERPASSWORD \
+			   --display_name=$WP_DISPLAYNAME
 
 
 wp option update home "http://$DOMAIN" --path=/var/www/wordpress --allow-root
