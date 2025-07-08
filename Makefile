@@ -11,8 +11,7 @@ all : add-host
 
 clean : remove-host
 	@sudo docker-compose -f ./srcs/docker-compose.yml down -v
-	@sudo rm -rf $(VOLPATH)/mariadb
-	@sudo rm -rf $(VOLPATH)/wordpress
+	@sudo rm -rf $(VOLPATH)
 
 fclean : clean
 	@sudo docker system prune -a -f --volumes
