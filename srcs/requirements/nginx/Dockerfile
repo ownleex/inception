@@ -1,11 +1,13 @@
 FROM debian:bullseye
 
-RUN apt update && apt upgrade -y && apt install -y nginx openssl
+RUN apt update -y && apt upgrade -y && apt install -y nginx curl openssl
 
-RUN mkdir -p /etc/nginx/ssl && \
-    openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout \
-    /etc/nginx/ssl/inception.key -subj "/C=MO/ST=KH/L=KH/O=1337/OU=1337/CN=ayarmaya.42.fr/UID=ayarmaya"
+RUN mkdir -p /etc/nginx/ssl && mkdir -p /var/run/nginx
+RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key -subj "/C=FR/ST=PACA/L=Nice/O=42/OU=42/CN=ayarmaya.42.fr/UID=ayarmaya"
+RUN chmod 755 /var/www/html && chown -R www-data:www-data /var/www/html
+RUN mv /var/www/html/index.nginx-debian.html /var/www/html/index_de_base_nginx.html
+RUN chown -R www-data:www-data /var/www/html
 
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]
