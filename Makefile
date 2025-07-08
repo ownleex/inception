@@ -1,16 +1,18 @@
-VOLPATH		= /home/ayarmaya/data
+# Variable pour le chemin des données avec valeur par défaut
+VOLPATH		= $(HOME)/data
 DOCKPATH	= ./srcs/docker-compose.yml
 DOMAIN		= ayarmaya.42.fr
 
 all : add-host
+	@echo "Création des dossiers dans: $(VOLPATH)"
 	@sudo mkdir -p $(VOLPATH)/mariadb
 	@sudo mkdir -p $(VOLPATH)/wordpress
 	@sudo chmod 777 $(VOLPATH)/mariadb
 	@sudo chmod 777 $(VOLPATH)/wordpress
-	@sudo docker-compose -f $(DOCKPATH) up -d
+	@HOME=$(HOME) sudo -E docker-compose -f $(DOCKPATH) up -d
 
 clean : remove-host
-	@sudo docker-compose -f ./srcs/docker-compose.yml down -v
+	@HOME=$(HOME) sudo -E docker-compose -f ./srcs/docker-compose.yml down -v
 	@sudo rm -rf $(VOLPATH)
 
 fclean : clean
@@ -41,4 +43,7 @@ show-hosts :
 	@echo "Contenu actuel de /etc/hosts concernant $(DOMAIN):"
 	@grep "$(DOMAIN)" /etc/hosts || echo "Aucune entrée trouvée pour $(DOMAIN)"
 
-.PHONY: all clean fclean re add-host remove-host show-hosts
+show-path :
+	@echo "Chemin des données actuel: $(VOLPATH)"
+
+.PHONY: all clean fclean re add-host remove-host show-hosts show-path
