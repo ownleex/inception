@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inception42 Project - Docker Virtualization</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+header {
+    background-color: #0d47a1;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header .logo {
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+header nav ul {
+    list-style: none;
+    display: flex;
+}
+
+header nav ul li {
+    margin-left: 20px;
+}
+
+header nav ul li a {
+    color: white;
+    font-size: 1.1em;
+    transition: color 0.3s ease;
+}
+
+header nav ul li a:hover {
+    color: #64b5f6;
+}
+
+
+.section {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.home {
+    background: linear-gradient(to right, #64b5f6, #1e88e5); 
+    color: white;
+}
+
+.about, .features, .contact {
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    border-radius: 8px;
+    padding: 40px 20px;
+}
+
+h1, h2 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+h3 {
+    font-size: 1.8em;
+    margin-bottom: 15px;
+}
+
+
+.btn {
+    padding: 15px 30px;
+    background-color: #1e88e5; 
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.btn:hover {
+    transform: scale(1.1);
+    background-color: #1565c0; 
+}
+
+
+.feature-card {
+    background-color: #ffffff;
+    padding: 30px;
+    margin: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+.feature-card h3 {
+    color: #0d47a1;
+}
+
+.contact form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.contact input,
+.contact textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.contact button {
+    width: 100%;
+    padding: 12px;
+    background-color: #0d47a1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    cursor: pointer;
+}
+
+footer {
+    background-color: #0d47a1;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+}
+
+</style>
+<body>
+    <header>
+        <div class="logo">Inception42</div>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="home" class="section home">
+        <h1>Welcome to Inception42!</h1>
+    </section>
+
+    <section id="about" class="section about">
+        <h2>About the Project</h2>
+        <p>Inception42 focuses on using Docker to gain hands-on experience in system administration and virtualization. You will create Docker images and deploy them in a virtual machine, simulating a real-world production environment.</p>
+    </section>
+
+    <section id="features" class="section features">
+        <h2>Key Features</h2>
+        <div class="feature-card">
+            <h3>Virtualization with Docker</h3>
+            <p>Learn how to virtualize services using Docker containers, providing scalability and isolation.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Docker Images Creation</h3>
+            <p>Get hands-on experience in creating Docker images from scratch to run different services in containers.</p>
+        </div>
+        <div class="feature-card">
+            <h3>System Administration</h3>
+            <p>Understand system administration concepts by managing Docker containers, networks, and volumes.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Automated Deployment</h3>
+            <p>Automate the deployment of your Docker containers using `docker-compose` and other Docker orchestration tools.</p>
+        </div>
+    </section>
+
+    <section id="contact" class="section contact">
+        <h2>Contact Us</h2>
+        <p>Have any questions or need assistance? Feel free to reach out to us.</p>
+        <form action="#" method="POST">
+            <input type="email" placeholder="Your Email" required>
+            <textarea placeholder="Your Message" required></textarea>
+            <button class="btn" type="submit">Send Message</button>
+        </form>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Salah-Eddine Diouane. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

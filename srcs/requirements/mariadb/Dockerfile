@@ -1,16 +1,11 @@
 FROM debian:bullseye
 
-# Installation de MariaDB
-RUN apt update -y && apt upgrade -y && \
-    apt install mariadb-server -y 
+RUN apt-get update && \
+	apt-get upgrade -y && \
+	apt-get install -y mariadb-server
 
-# Copie de la configuration et du script
-COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
-COPY tools/init_db.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/init_db.sh
+COPY ./tools/script.sh /script.sh
 
-# Exposition du port
-EXPOSE 3306
+RUN chmod +x /script.sh
 
-# Point d'entrée
-ENTRYPOINT ["sh", "/usr/local/bin/init_db.sh"]
+ENTRYPOINT [ "./script.sh" ]

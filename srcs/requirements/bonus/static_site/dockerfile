@@ -1,0 +1,12 @@
+
+FROM debian:bullseye
+
+RUN apt-get update && apt-get install -y php curl
+
+COPY ./conf/index.html /var/www/html/index.html
+
+WORKDIR /var/www/html
+
+EXPOSE 8000
+
+ENTRYPOINT ["php", "-S", "0.0.0.0:8000", "-t", "/var/www/html/"]

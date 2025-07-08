@@ -1,39 +1,14 @@
 FROM debian:bullseye
 
-# Installation de PHP, WordPress et outils nécessaires
-RUN apt update -y && apt upgrade -y && \
-    apt install -y \
-    php7.4-fpm \
-    php7.4-mysql \
-    php7.4-curl \
-    php7.4-gd \
-    php7.4-mbstring \
-    php7.4-xml \
-    php7.4-zip \
-    curl \
-    mariadb-client && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt update  &&  apt install -y curl git wget php php-fpm php-mysql 
 
-# Configuration de PHP-FPM pour les logs
-RUN mkdir -p /var/log && touch /var/log/php7.4-fpm.log
+COPY tools/auto_config.sh /
 
-# Téléchargement et installation de WordPress
-WORKDIR /var/www/html
-RUN curl -O https://wordpress.org/latest.tar.gz && \
-    tar xzf latest.tar.gz --strip-components=1 && \
-    rm latest.tar.gz && \
-    chown -R www-data:www-data /var/www/html
+RUN chmod +x /auto_config.sh
 
-# Copie des fichiers de configuration
-COPY conf/www.conf /etc/php/7.4/fpm/pool.d/
-COPY tools/init_wordpress.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/init_wordpress.sh
+WORKDIR /var/www/wordpress
 
-# Création du répertoire pour le socket PHP-FPM
 RUN mkdir -p /run/php
 
-# Exposition du port PHP-FPM
-EXPOSE 9000
+ENTRYPOINT [ "bash", "/auto_config.sh" ]
 
-# Point d'entrée
-ENTRYPOINT ["sh", "/usr/local/bin/init_wordpress.sh"]
