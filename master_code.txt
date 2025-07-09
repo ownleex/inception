@@ -1,0 +1,400 @@
+======================================================
+           CONSOLIDATION DE TOUS LES FICHIERS
+======================================================
+Généré le: mer. 09 juil. 2025 18:03:06 CEST
+Répertoire: /home/ayarmaya/Documents/inception
+======================================================
+
+
+======================================================
+FICHIER: Makefile
+======================================================
+
+# Variable pour le chemin des données avec valeur par défaut
+VOLPATH		= $(HOME)/data
+DOCKPATH	= ./srcs/docker-compose.yml
+DOMAIN		= ayarmaya.42.fr
+
+all : add-host
+	@echo "Création des dossiers dans: $(VOLPATH)"
+	@sudo mkdir -p $(VOLPATH)/mariadb
+	@sudo mkdir -p $(VOLPATH)/wordpress
+	@sudo chmod 777 $(VOLPATH)/mariadb
+	@sudo chmod 777 $(VOLPATH)/wordpress
+	@HOME=$(HOME) sudo -E docker-compose -f $(DOCKPATH) up -d
+
+clean : remove-host
+	@HOME=$(HOME) sudo -E docker-compose -f ./srcs/docker-compose.yml down -v
+	@sudo rm -rf $(VOLPATH)
+
+fclean : clean
+	@sudo docker system prune -a -f --volumes
+	@sudo docker network prune -f
+
+re : fclean all
+
+add-host :
+	@echo "Ajout de $(DOMAIN) au fichier hosts..."
+	@if ! grep -q "$(DOMAIN)" /etc/hosts; then \
+		echo "127.0.0.1	$(DOMAIN)" | sudo tee -a /etc/hosts > /dev/null; \
+		echo "$(DOMAIN) ajouté à /etc/hosts"; \
+	else \
+		echo "$(DOMAIN) existe déjà dans /etc/hosts"; \
+	fi
+
+remove-host :
+	@echo "Suppression de $(DOMAIN) du fichier hosts..."
+	@if grep -q "$(DOMAIN)" /etc/hosts; then \
+		sudo sed -i '/$(DOMAIN)/d' /etc/hosts; \
+		echo "$(DOMAIN) supprimé de /etc/hosts"; \
+	else \
+		echo "$(DOMAIN) n'existe pas dans /etc/hosts"; \
+	fi
+
+show-hosts :
+	@echo "Contenu actuel de /etc/hosts concernant $(DOMAIN):"
+	@grep "$(DOMAIN)" /etc/hosts || echo "Aucune entrée trouvée pour $(DOMAIN)"
+
+show-path :
+	@echo "Chemin des données actuel: $(VOLPATH)"
+
+.PHONY: all clean fclean re add-host remove-host show-hosts show-path
+======================================================
+
+
+======================================================
+FICHIER: srcs/docker-compose.yml
+======================================================
+
+services:
+    mariadb:
+            container_name: mariadb
+            networks:
+                - mynetwork
+            expose:
+                - "3306"
+            env_file:
+                - .env
+            environment:
+                DB_NAME: ${DB_NAME}
+                DB_USER: ${DB_USER}
+                DB_PASSWORD: ${DB_PASSWORD}
+            build:
+                context: requirements/mariadb
+                dockerfile: Dockerfile
+            restart: unless-stopped
+            volumes:
+                - mariadb:/var/lib/mysql
+
+    nginx:
+        container_name: nginx
+        networks:
+            - mynetwork
+        ports:
+            - "443:443"
+        build:
+            context: requirements/nginx
+            dockerfile: Dockerfile
+        depends_on:
+            - wordpress
+        volumes:
+            - wordpress:/var/www/wordpress
+
+    wordpress:
+        container_name: wordpress
+        networks:
+            - mynetwork
+        expose:
+            - "9000"
+        build:
+            context: requirements/wordpress
+            dockerfile: Dockerfile
+        env_file:
+            - .env
+        environment:
+            DB_NAME: ${DB_NAME}
+            DB_USER: ${DB_USER}
+            DB_PASSWORD: ${DB_PASSWORD}
+            WP_TITLE: ${WP_TITLE}
+            WP_USERPASSWORD: ${WP_USERPASSWORD}
+            WP_USER: ${WP_USER}
+            WP_USEREMAIL: ${WP_USEREMAIL}
+            WP_ADMINEMAIL: ${WP_ADMINEMAIL}
+            WP_ADMINPASSWORD: ${WP_ADMINPASSWORD}
+            WP_ADMINUSER: ${WP_ADMINUSER}
+            DOMAIN: ${DOMAIN}
+            WP_ROLE: ${WP_ROLE}
+            WP_PATHWORDPRESS: ${WP_PATHWORDPRESS}
+        depends_on:
+            - mariadb
+        restart: on-failure
+        volumes:
+            - wordpress:/var/www/wordpress
+
+networks:
+    mynetwork:
+        driver: bridge
+
+volumes:
+    mariadb:
+        driver: local
+        driver_opts:
+            type: 'none' 
+            o: 'bind'
+            device: '${HOME}/data/mariadb/'
+    wordpress:
+        driver: local
+        driver_opts:
+            type: 'none'
+            o: 'bind'
+            device: '${HOME}/data/wordpress/'
+======================================================
+
+
+======================================================
+FICHIER: srcs/requirements/nginx/Dockerfile
+======================================================
+
+FROM debian:bullseye
+
+RUN apt update -y && apt upgrade -y && apt install -y nginx curl openssl
+
+RUN mkdir -p /etc/nginx/ssl && mkdir -p /var/run/nginx
+RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key -subj "/C=FR/ST=PACA/L=Nice/O=42/OU=42/CN=ayarmaya.42.fr/UID=ayarmaya"
+RUN chmod 755 /var/www/html && chown -R www-data:www-data /var/www/html
+RUN mv /var/www/html/index.nginx-debian.html /var/www/html/index_de_base_nginx.html
+RUN chown -R www-data:www-data /var/www/html
+
+COPY conf/nginx.conf /etc/nginx/nginx.conf
+
+CMD ["nginx", "-g", "daemon off;"]
+======================================================
+
+
+======================================================
+FICHIER: srcs/requirements/nginx/conf/nginx.conf
+======================================================
+
+events {
+}
+
+http {
+    
+    include /etc/nginx/mime.types;
+    
+	upstream php-fpm {
+        server wordpress:9000;
+    }
+
+    server {
+        listen 443 ssl;
+		ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_certificate /etc/nginx/ssl/inception.crt;
+        ssl_certificate_key /etc/nginx/ssl/inception.key;
+
+		root /var/www/wordpress;
+        server_name ayarmaya.42.fr;
+		index index.php index.html index.htm;
+
+        location / {
+            try_files $uri $uri/ /index.php?$args;
+        }
+
+        location ~ \.php$ {
+            include snippets/fastcgi-php.conf;
+            fastcgi_pass php-fpm;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;
+        }
+    }
+}
+======================================================
+
+
+======================================================
+FICHIER: srcs/requirements/mariadb/Dockerfile
+======================================================
+
+FROM debian:bullseye
+
+RUN apt update -y && apt upgrade -y && apt install mariadb-server sudo -y
+
+COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
+COPY tools/init_db.sh /usr/local/bin/
+
+RUN chmod +x /usr/local/bin/init_db.sh
+
+ENTRYPOINT ["bash", "/usr/local/bin/init_db.sh"]
+======================================================
+
+
+======================================================
+FICHIER: srcs/requirements/mariadb/conf/50-server.cnf
+======================================================
+
+[mysqld]
+datadir = /var/lib/mysql
+socket = /var/run/mysqld/mysqld.sock
+bind_address = 0.0.0.0
+port = 3306
+user = mysql
+======================================================
+
+
+======================================================
+FICHIER: srcs/requirements/mariadb/tools/init_db.sh
+======================================================
+
+#!/bin/bash
+
+chown -R mysql:mysql /var/lib/mysql
+
+mysql_install_db --user=mysql --datadir=/var/lib/mysql >> /dev/null
+/usr/bin/mysqld_safe --datadir=/var/lib/mysql &
+
+while true; do
+    if /usr/bin/mysqladmin ping --silent; then
+        echo "MySQL is online"
+        break
+    fi
+    sleep 1
+done
+
+if [ -n "$DB_NAME" ]; then
+    echo "Checking if $DB_NAME already exists"
+    mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+    if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+        echo "Checking if $DB_USER already exists..."
+        mysql -u root -e "CREATE USER IF NOT EXISTS \`${DB_USER}\`@'%' IDENTIFIED BY '${DB_PASSWORD}';"
+        echo "Granting privileges to $DB_USER on $DB_NAME"
+        mysql -u root -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';"
+        echo "Flushing privileges..."
+        mysql -u root -e "FLUSH PRIVILEGES;"
+    fi
+fi
+
+wait
+
+======================================================
+
+
+======================================================
+FICHIER: srcs/requirements/wordpress/Dockerfile
+======================================================
+
+FROM debian:bullseye
+
+RUN apt-get update -y && apt-get upgrade -y && apt-get install php7.4 php7.4-fpm php7.4-mysql wget mariadb-client bash gettext-base -y
+
+RUN	mkdir -p /etc/conf/ && mkdir -p /run/php && chown www-data:www-data /run/php && \
+    wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && mv -f wp-cli.phar /usr/local/bin/wp
+
+# Télécharger la dernière version de WordPress
+RUN	wget https://wordpress.org/latest.tar.gz -P /var/www && \
+	cd /var/www && tar -xzf latest.tar.gz && rm latest.tar.gz && \
+	chown -R www-data:www-data /var/www/wordpress
+
+COPY /tools/wp.sh /etc/conf/
+COPY /conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
+
+RUN chmod +x /etc/conf/wp.sh
+
+CMD ["bash", "/etc/conf/wp.sh"]
+======================================================
+
+
+======================================================
+FICHIER: srcs/requirements/wordpress/conf/www.conf
+======================================================
+
+[www]
+user = www-data
+group = www-data
+clear_env = no
+listen = 0.0.0.0:9000
+listen.owner = www-data
+listen.group = www-data
+pm = dynamic
+pm.max_children = 25
+pm.start_servers = 5
+pm.min_spare_servers = 1
+pm.max_spare_servers = 10
+======================================================
+
+
+======================================================
+FICHIER: srcs/requirements/wordpress/tools/wp.sh
+======================================================
+
+#!/bin/bash
+
+# Créer les dossiers nécessaires
+mkdir -p /run/php
+chown -R www-data:www-data /run/php
+chown -R www-data:www-data /var/www/wordpress
+
+# Créer wp-config.php depuis le sample s'il n'existe pas
+if [ ! -f /var/www/wordpress/wp-config.php ]; then
+    cp /var/www/wordpress/wp-config-sample.php /var/www/wordpress/wp-config.php
+fi
+
+# Configuration de la base de données dans wp-config.php
+if [ -n "$DB_NAME" ]; then
+	sed -i "s/database_name_here/$DB_NAME/g" /var/www/wordpress/wp-config.php
+	if [ -n "$DB_USER" ]; then
+		sed -i "s/username_here/$DB_USER/g" /var/www/wordpress/wp-config.php
+		if [ -n "$DB_PASSWORD" ]; then
+    		sed -i "s/password_here/$DB_PASSWORD/g" /var/www/wordpress/wp-config.php
+		fi
+	fi
+fi
+
+sed -i "s/localhost/mariadb/g" /var/www/wordpress/wp-config.php
+
+# Attendre que MariaDB soit prête
+echo "Attente de la base de données..."
+until wp db check --allow-root --path=/var/www/wordpress; do
+    sleep 5
+    echo "Retry database connection..."
+done
+
+# Installation de WordPress si pas déjà fait
+if ! wp core is-installed --allow-root --path=/var/www/wordpress; then
+    echo "Installation de WordPress..."
+    wp core install --allow-root \
+                    --path=$WP_PATHWORDPRESS \
+                    --url=https://$DOMAIN \
+                    --title="$WP_TITLE" \
+                    --admin_user=$WP_ADMINUSER \
+                    --admin_password=$WP_ADMINPASSWORD \
+                    --admin_email=$WP_ADMINEMAIL
+
+    wp user create --allow-root $WP_USER $WP_USEREMAIL \
+                   --path=$WP_PATHWORDPRESS \
+                   --role=$WP_ROLE \
+                   --user_pass=$WP_USERPASSWORD
+    
+    echo "WordPress installé avec succès !"
+else
+    echo "WordPress est déjà installé."
+fi
+
+# Installation et activation du thème AnyNews
+echo "Installation du thème AnyNews ..."
+wp theme install anynews  --allow-root --path=/var/www/wordpress --activate
+echo "Thème AnyNews  activé avec succès !"
+
+# Démarrer PHP-FPM en premier plan
+echo "Démarrage de PHP-FPM..."
+/usr/sbin/php-fpm7.4 -F -R
+======================================================
+
+
+======================================================
+                    RÉSUMÉ
+======================================================
+Nombre de fichiers traités: 10
+Nombre total de lignes: 305
+Date de génération: mer. 09 juil. 2025 18:03:06 CEST
+======================================================
