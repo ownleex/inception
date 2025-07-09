@@ -56,10 +56,6 @@ echo "Installation du thème AnyNews ..."
 wp theme install anynews  --allow-root --path=/var/www/wordpress --activate
 echo "Thème AnyNews  activé avec succès !"
 
-# Mise à jour des URLs
-wp option update home "https://$DOMAIN" --path=/var/www/wordpress --allow-root
-wp option update siteurl "https://$DOMAIN" --path=/var/www/wordpress --allow-root
-
 # Démarrer PHP-FPM en premier plan
 echo "Démarrage de PHP-FPM..."
 /usr/sbin/php-fpm7.4 -F -R
