@@ -44,8 +44,7 @@ if ! wp core is-installed --allow-root --path=/var/www/wordpress; then
     wp user create --allow-root $WP_USER $WP_USEREMAIL \
                    --path=$WP_PATHWORDPRESS \
                    --role=$WP_ROLE \
-                   --user_pass=$WP_USERPASSWORD \
-                   --display_name="$WP_DISPLAYNAME"
+                   --user_pass=$WP_USERPASSWORD
     
     echo "WordPress installé avec succès !"
 else

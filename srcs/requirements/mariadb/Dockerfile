@@ -7,4 +7,4 @@ COPY tools/init_db.sh /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/init_db.sh
 
-ENTRYPOINT ["sh", "/usr/local/bin/init_db.sh"]
+ENTRYPOINT ["bash", "/usr/local/bin/init_db.sh"]
