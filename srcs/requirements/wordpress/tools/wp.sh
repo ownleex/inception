@@ -61,4 +61,4 @@ chown -R www-data:www-data /var/www/wordpress/wp-content/upgrade
 
 # Démarrer PHP-FPM en premier plan
 echo "Démarrage de PHP-FPM..."
-/usr/sbin/php-fpm7.4 -F -R
+exec /usr/sbin/php-fpm7.4 -F -R
