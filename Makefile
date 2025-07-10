@@ -46,4 +46,11 @@ show-hosts :
 show-path :
 	@echo "Chemin des données actuel: $(VOLPATH)"
 
+mysql:
+	@echo "$(GREEN)🔐 Connexion MySQL (mot de passe requis)...$(NC)"
+	@docker exec -it mariadb mysql -u root -p
+
+logs:
+	@docker-compose -f $(DOCKPATH) logs -f
+
 .PHONY: all clean fclean re add-host remove-host show-hosts show-path
