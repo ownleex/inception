@@ -18,10 +18,9 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     mysql_install_db --user=mysql --datadir=/var/lib/mysql >> /dev/null
 fi
 
-# Démarrer MySQL et récupérer son PID
+# Démarrer MySQL 
 echo "Démarrage de MySQL..."
 /usr/bin/mysqld_safe --datadir=/var/lib/mysql &
-MYSQL_PID=$!
 
 # Attendre que MySQL soit prêt
 until /usr/bin/mysqladmin ping --silent; do
@@ -45,5 +44,4 @@ fi
 
 echo "MariaDB est prête !"
 
-# Attendre le processus MySQL spécifique
-wait $MYSQL_PID
+wait
