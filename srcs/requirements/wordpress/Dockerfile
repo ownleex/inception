@@ -1,6 +1,16 @@
 FROM debian:bullseye
 
-RUN apt-get update -y && apt-get upgrade -y && apt-get install php7.4 php7.4-fpm php7.4-mysql wget mariadb-client bash gettext-base -y
+RUN apt-get update -y && apt-get upgrade -y && \
+    apt-get install -y \
+      php7.4 \
+      php7.4-fpm \
+      php7.4-mysql \
+      php7.4-gd \
+      php-imagick \
+      wget \
+      mariadb-client \
+      bash \
+      gettext-base
 
 RUN	mkdir -p /etc/conf/ && mkdir -p /run/php && chown www-data:www-data /run/php && \
     wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
