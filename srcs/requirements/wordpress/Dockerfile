@@ -6,11 +6,8 @@ RUN apt-get update -y && apt-get upgrade -y && \
       php7.4-fpm \
       php7.4-mysql \
       php7.4-gd \
-      php-imagick \
       wget \
-      mariadb-client \
-      bash \
-      gettext-base
+      mariadb-client
 
 RUN	mkdir -p /etc/conf/ && mkdir -p /run/php && chown www-data:www-data /run/php && \
     wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
