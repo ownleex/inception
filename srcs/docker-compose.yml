@@ -1,27 +1,25 @@
+version: '3.8'
+
 services:
     mariadb:
             container_name: mariadb
             networks:
-                - mynetwork
+                - inceptionnetwork
             expose:
                 - "3306"
             env_file:
                 - .env
-            environment:
-                DB_NAME: ${DB_NAME}
-                DB_USER: ${DB_USER}
-                DB_PASSWORD: ${DB_PASSWORD}
             build:
                 context: requirements/mariadb
                 dockerfile: Dockerfile
-            restart: unless-stopped
+            restart: on-failure
             volumes:
                 - mariadb:/var/lib/mysql
 
     nginx:
         container_name: nginx
         networks:
-            - mynetwork
+            - inceptionnetwork
         ports:
             - "443:443"
         build:
@@ -29,13 +27,14 @@ services:
             dockerfile: Dockerfile
         depends_on:
             - wordpress
+        restart: on-failure
         volumes:
             - wordpress:/var/www/wordpress
 
     wordpress:
         container_name: wordpress
         networks:
-            - mynetwork
+            - inceptionnetwork
         expose:
             - "9000"
         build:
@@ -43,20 +42,6 @@ services:
             dockerfile: Dockerfile
         env_file:
             - .env
-        environment:
-            DB_NAME: ${DB_NAME}
-            DB_USER: ${DB_USER}
-            DB_PASSWORD: ${DB_PASSWORD}
-            WP_TITLE: ${WP_TITLE}
-            WP_USERPASSWORD: ${WP_USERPASSWORD}
-            WP_USER: ${WP_USER}
-            WP_USEREMAIL: ${WP_USEREMAIL}
-            WP_ADMINEMAIL: ${WP_ADMINEMAIL}
-            WP_ADMINPASSWORD: ${WP_ADMINPASSWORD}
-            WP_ADMINUSER: ${WP_ADMINUSER}
-            DOMAIN: ${DOMAIN}
-            WP_ROLE: ${WP_ROLE}
-            WP_PATHWORDPRESS: ${WP_PATHWORDPRESS}
         depends_on:
             - mariadb
         restart: on-failure
@@ -64,7 +49,7 @@ services:
             - wordpress:/var/www/wordpress
 
 networks:
-    mynetwork:
+    inceptionnetwork:
         driver: bridge
 
 volumes:
