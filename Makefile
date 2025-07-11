@@ -47,10 +47,18 @@ show-path :
 	@echo "Chemin des données actuel: $(VOLPATH)"
 
 mysql:
-	@echo "$(GREEN)🔐 Connexion MySQL (mot de passe requis)...$(NC)"
+	@echo "🔐 Connexion MySQL (mot de passe requis)..."
 	@docker exec -it mariadb mysql -u root -p
+
+ftp-test:
+	@echo "🔗 Test de connexion FTP..."
+	@echo "Utilisateur: $(shell grep FTP_USER srcs/.env | cut -d'=' -f2)"
+	@echo "Connectez-vous avec: ftp localhost"
 
 logs:
 	@docker-compose -f $(DOCKPATH) logs -f
 
-.PHONY: all clean fclean re add-host remove-host show-hosts show-path
+logs-ftp:
+	@docker logs ftp -f
+
+.PHONY: all clean fclean re add-host remove-host show-hosts show-path mysql ftp-test logs logs-ftp
