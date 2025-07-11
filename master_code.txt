@@ -1,7 +1,7 @@
 ======================================================
            CONSOLIDATION DE TOUS LES FICHIERS
 ======================================================
-Généré le: jeu. 10 juil. 2025 15:05:18 CEST
+Généré le: ven. 11 juil. 2025 22:37:08 CEST
 Répertoire: /home/ayarmaya/Documents/inception
 ======================================================
 
@@ -58,7 +58,22 @@ show-hosts :
 show-path :
 	@echo "Chemin des données actuel: $(VOLPATH)"
 
-.PHONY: all clean fclean re add-host remove-host show-hosts show-path
+mysql:
+	@echo "🔐 Connexion MySQL (mot de passe requis)..."
+	@docker exec -it mariadb mysql -u root -p
+
+ftp-test:
+	@echo "🔗 Test de connexion FTP..."
+	@echo "Utilisateur: $(shell grep FTP_USER srcs/.env | cut -d'=' -f2)"
+	@echo "Connectez-vous avec: ftp localhost"
+
+logs:
+	@docker-compose -f $(DOCKPATH) logs -f
+
+logs-ftp:
+	@docker logs ftp -f
+
+.PHONY: all clean fclean re add-host remove-host show-hosts show-path mysql ftp-test logs logs-ftp
 ======================================================
 
 
@@ -118,7 +133,7 @@ volumes:
     mariadb:
         driver: local
         driver_opts:
-            type: 'none' 
+            type: 'none'
             o: 'bind'
             device: '${HOME}/data/mariadb/'
     wordpress:
@@ -207,6 +222,122 @@ http {
 
 
 ======================================================
+FICHIER: srcs/requirements/ftp/Dockerfile
+======================================================
+
+FROM debian:bullseye
+
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y vsftpd
+
+# Créer le répertoire de configuration et les scripts
+RUN mkdir -p /var/run/vsftpd/empty
+
+COPY conf/vsftpd.conf /etc/vsftpd.conf
+COPY tools/ftp_setup.sh /usr/local/bin/
+
+RUN chmod +x /usr/local/bin/ftp_setup.sh
+
+EXPOSE 21 20 21000-21010
+
+CMD ["bash", "/usr/local/bin/ftp_setup.sh"]
+======================================================
+
+
+======================================================
+FICHIER: srcs/requirements/ftp/conf/vsftpd.conf
+======================================================
+
+# Configuration vsftpd pour le serveur FTP
+listen=YES
+listen_ipv6=NO
+
+# CRUCIAL : Rester en foreground pour Docker
+background=NO
+
+# Désactiver l'accès anonyme
+anonymous_enable=NO
+
+# Activer les utilisateurs locaux
+local_enable=YES
+write_enable=YES
+local_umask=022
+
+# Messages et logs
+dirmessage_enable=YES
+use_localtime=YES
+xferlog_enable=YES
+xferlog_file=/var/log/vsftpd.log
+xferlog_std_format=YES
+
+# Connexions
+connect_from_port_20=YES
+ftpd_banner=Bienvenue sur le serveur FTP Inception
+
+# Sécurité - emprisonner les utilisateurs dans leur répertoire home
+chroot_local_user=YES
+allow_writeable_chroot=YES
+secure_chroot_dir=/var/run/vsftpd/empty
+
+# Configuration PAM
+pam_service_name=vsftpd
+
+# Mode passif pour les connexions derrière NAT/firewall
+pasv_enable=YES
+pasv_min_port=21000
+pasv_max_port=21010
+# Supprimer pasv_address pour Docker
+
+# Permissions
+file_open_mode=0666
+local_max_rate=0
+
+# Timeouts
+idle_session_timeout=300
+data_connection_timeout=120
+
+# Autres options de sécurité
+ssl_enable=NO
+userlist_enable=NO
+======================================================
+
+
+======================================================
+FICHIER: srcs/requirements/ftp/tools/ftp_setup.sh
+======================================================
+
+#!/bin/bash
+
+set -e
+
+echo "Configuration du serveur FTP..."
+
+# Créer l'utilisateur FTP s'il n'existe pas
+if ! id "$FTP_USER" &>/dev/null; then
+    echo "Création de l'utilisateur FTP: $FTP_USER"
+    useradd -m -d /var/www/wordpress -s /bin/bash "$FTP_USER"
+    echo "$FTP_USER:$FTP_PASSWORD" | chpasswd
+else
+    echo "L'utilisateur $FTP_USER existe déjà"
+fi
+
+# S'assurer que l'utilisateur a accès au répertoire WordPress
+chown -R "$FTP_USER:$FTP_USER" /var/www/wordpress
+chmod -R 755 /var/www/wordpress
+
+# Créer le répertoire de log s'il n'existe pas
+mkdir -p /var/log
+touch /var/log/vsftpd.log
+
+# Créer le répertoire secure_chroot_dir s'il n'existe pas
+mkdir -p /var/run/vsftpd/empty
+
+echo "Démarrage du serveur FTP..."
+exec /usr/sbin/vsftpd /etc/vsftpd.conf
+======================================================
+
+
+======================================================
 FICHIER: srcs/requirements/mariadb/Dockerfile
 ======================================================
 
@@ -216,6 +347,8 @@ RUN apt update -y && apt upgrade -y && apt install mariadb-server sudo -y
 
 COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
 COPY tools/init_db.sh /usr/local/bin/
+
+RUN mkdir -p /var/run/mysqld && chown -R mysql:mysql /var/run/mysqld
 
 RUN chmod +x /usr/local/bin/init_db.sh
 
@@ -242,33 +375,28 @@ FICHIER: srcs/requirements/mariadb/tools/init_db.sh
 
 #!/bin/bash
 
+set -e
+
+# Vérifier les permissions
 chown -R mysql:mysql /var/lib/mysql
 
-mysql_install_db --user=mysql --datadir=/var/lib/mysql >> /dev/null
-/usr/bin/mysqld_safe --datadir=/var/lib/mysql &
-
-while true; do
-    if /usr/bin/mysqladmin ping --silent; then
-        echo "MySQL is online"
-        break
-    fi
-    sleep 1
-done
-
-if [ -n "$DB_NAME" ]; then
-    echo "Checking if $DB_NAME already exists"
-    mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
-    if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
-        echo "Checking if $DB_USER already exists..."
-        mysql -u root -e "CREATE USER IF NOT EXISTS \`${DB_USER}\`@'%' IDENTIFIED BY '${DB_PASSWORD}';"
-        echo "Granting privileges to $DB_USER on $DB_NAME"
-        mysql -u root -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';"
-        echo "Flushing privileges..."
-        mysql -u root -e "FLUSH PRIVILEGES;"
-    fi
+# Initialisation manuelle de la base si nécessaire
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+    echo "Initialisation de la base de données..."
+    mysql_install_db --user=mysql --datadir=/var/lib/mysql > /dev/null
 fi
 
-wait
+# Préparer un script SQL à injecter lors du démarrage
+cat << EOF > /tmp/init.sql
+CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;
+CREATE USER IF NOT EXISTS \`${DB_USER}\`@'%' IDENTIFIED BY '${DB_PASSWORD}';
+GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'%';
+FLUSH PRIVILEGES;
+EOF
+
+# Démarrer MariaDB en tant que PID 1 avec le script d'init
+echo "Lancement de MariaDB avec injection SQL..."
+exec mysqld --init-file=/tmp/init.sql --datadir=/var/lib/mysql
 
 ======================================================
 
@@ -279,15 +407,22 @@ FICHIER: srcs/requirements/wordpress/Dockerfile
 
 FROM debian:bullseye
 
-RUN apt-get update -y && apt-get upgrade -y && apt-get install php7.4 php7.4-fpm php7.4-mysql wget mariadb-client bash gettext-base -y
+RUN apt-get update -y && apt-get upgrade -y && \
+    apt-get install -y \
+      php7.4 \
+      php7.4-fpm \
+      php7.4-mysql \
+      php7.4-gd \
+      wget \
+      mariadb-client
 
 RUN	mkdir -p /etc/conf/ && mkdir -p /run/php && chown www-data:www-data /run/php && \
     wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
     chmod +x wp-cli.phar && mv -f wp-cli.phar /usr/local/bin/wp
 
 # Télécharger la dernière version de WordPress
-RUN	wget https://wordpress.org/latest.tar.gz -P /var/www && \
-	cd /var/www && tar -xzf latest.tar.gz && rm latest.tar.gz && \
+RUN	wget https://fr.wordpress.org/latest-fr_FR.tar.gz -P /var/www && \
+	cd /var/www && tar -xzf latest-fr_FR.tar.gz && rm latest-fr_FR.tar.gz && \
 	chown -R www-data:www-data /var/www/wordpress
 
 COPY /tools/wp.sh /etc/conf/
@@ -365,6 +500,10 @@ if ! wp core is-installed --allow-root --path=/var/www/wordpress; then
                     --admin_password=$WP_ADMINPASSWORD \
                     --admin_email=$WP_ADMINEMAIL
 
+    # Configurer la timezone WordPress en Europe/Paris
+    wp option update timezone_string "Europe/Paris" --allow-root --path=/var/www/wordpress
+
+
     wp user create --allow-root $WP_USER $WP_USEREMAIL \
                    --path=$WP_PATHWORDPRESS \
                    --role=$WP_ROLE \
@@ -385,14 +524,14 @@ chown -R www-data:www-data /var/www/wordpress/wp-content/upgrade
 
 # Démarrer PHP-FPM en premier plan
 echo "Démarrage de PHP-FPM..."
-/usr/sbin/php-fpm7.4 -F -R
+exec /usr/sbin/php-fpm7.4 -F -R
 ======================================================
 
 
 ======================================================
                     RÉSUMÉ
 ======================================================
-Nombre de fichiers traités: 10
-Nombre total de lignes: 303
-Date de génération: jeu. 10 juil. 2025 15:05:19 CEST
+Nombre de fichiers traités: 13
+Nombre total de lignes: 418
+Date de génération: ven. 11 juil. 2025 22:37:09 CEST
 ======================================================
