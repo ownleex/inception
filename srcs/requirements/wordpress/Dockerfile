@@ -14,8 +14,8 @@ RUN	mkdir -p /etc/conf/ && mkdir -p /run/php && chown www-data:www-data /run/php
     chmod +x wp-cli.phar && mv -f wp-cli.phar /usr/local/bin/wp
 
 # Télécharger la dernière version de WordPress
-RUN	wget https://wordpress.org/latest.tar.gz -P /var/www && \
-	cd /var/www && tar -xzf latest.tar.gz && rm latest.tar.gz && \
+RUN	wget https://fr.wordpress.org/latest-fr_FR.tar.gz -P /var/www && \
+	cd /var/www && tar -xzf latest-fr_FR.tar.gz && rm latest-fr_FR.tar.gz && \
 	chown -R www-data:www-data /var/www/wordpress
 
 COPY /tools/wp.sh /etc/conf/

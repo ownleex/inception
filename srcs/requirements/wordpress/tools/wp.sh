@@ -41,6 +41,10 @@ if ! wp core is-installed --allow-root --path=/var/www/wordpress; then
                     --admin_password=$WP_ADMINPASSWORD \
                     --admin_email=$WP_ADMINEMAIL
 
+    # Configurer la timezone WordPress en Europe/Paris (UTC+2 en été)
+    wp option update timezone_string "Europe/Paris" --allow-root --path=/var/www/wordpress
+
+
     wp user create --allow-root $WP_USER $WP_USEREMAIL \
                    --path=$WP_PATHWORDPRESS \
                    --role=$WP_ROLE \
