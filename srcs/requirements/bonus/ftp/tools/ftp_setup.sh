@@ -2,60 +2,45 @@
 
 set -e
 
-echo "=== Configuration du serveur FTP ==="
-
 # Attendre que le dossier WordPress soit prêt
 while [ ! -d "/var/www/wordpress" ]; do
     echo "En attente du dossier WordPress..."
     sleep 2
 done
 
-echo "Utilisation de l'utilisateur: $FTP_USER"
-
-# Créer l'utilisateur FTP s'il n'existe pas
+# Créer l'utilisateur FTP
 if ! id "$FTP_USER" &>/dev/null; then
     echo "Création de l'utilisateur FTP: $FTP_USER"
     useradd -m -d /var/www/wordpress -s /bin/bash "$FTP_USER"
     echo "$FTP_USER:$FTP_PASSWORD" | chpasswd
-    echo "Utilisateur $FTP_USER créé avec succès"
 else
     echo "L'utilisateur $FTP_USER existe déjà"
     echo "$FTP_USER:$FTP_PASSWORD" | chpasswd
+    usermod -d /var/www/wordpress "$FTP_USER"
 fi
 
-# Créer les répertoires nécessaires
+# Ajouter aux groupes nécessaires
+usermod -a -G www-data "$FTP_USER"
+
+# Configuration des permissions
+chown -R "$FTP_USER:$FTP_USER" /var/www/wordpress
+chmod -R 755 /var/www/wordpress
+
+# Permissions spéciales pour wp-content
+if [ -d "/var/www/wordpress/wp-content" ]; then
+    chmod -R 777 /var/www/wordpress/wp-content
+    chown -R "$FTP_USER:$FTP_USER" /var/www/wordpress/wp-content
+fi
+
+# Créer les répertoires vsftpd
 mkdir -p /var/run/vsftpd/empty
 mkdir -p /var/log
 touch /var/log/vsftpd.log
 
-# Ajouter l'utilisateur FTP au groupe www-data
-usermod -a -G www-data "$FTP_USER"
-
-# Configuration des permissions - CRITIQUE
-echo "Configuration des permissions..."
-
-# Changer le propriétaire principal pour permettre l'écriture FTP
-chown -R "$FTP_USER:www-data" /var/www/wordpress
-
-# Définir les bonnes permissions
-find /var/www/wordpress -type d -exec chmod 755 {} \;
-find /var/www/wordpress -type f -exec chmod 644 {} \;
-
-# Permissions spéciales pour les dossiers d'upload WordPress
-if [ -d "/var/www/wordpress/wp-content" ]; then
-    chmod -R 775 /var/www/wordpress/wp-content
-    chown -R "$FTP_USER:www-data" /var/www/wordpress/wp-content
-fi
-
-if [ -d "/var/www/wordpress/wp-content/uploads" ]; then
-    chmod -R 775 /var/www/wordpress/wp-content/uploads
-    chown -R "$FTP_USER:www-data" /var/www/wordpress/wp-content/uploads
-fi
-
-echo "Permissions configurées:"
-ls -la /var/www/wordpress/
+# Configuration vsftpd supplémentaire
+echo "user_sub_token=$FTP_USER" >> /etc/vsftpd.conf
+echo "local_root=/var/www/wordpress" >> /etc/vsftpd.conf
+echo "hide_ids=NO" >> /etc/vsftpd.conf
 
 echo "Démarrage de vsftpd..."
-
-# Démarrer vsftpd en mode foreground
 exec /usr/sbin/vsftpd /etc/vsftpd.conf
