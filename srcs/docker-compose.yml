@@ -42,6 +42,22 @@ services:
         volumes:
             - wordpress:/var/www/wordpress
 
+    ftp:
+        container_name: ftp
+        networks:
+            - inceptionnetwork
+        ports:
+            - "21:21"
+            - "21000-21010:21000-21010"
+        build: requirements/bonus/ftp
+        env_file:
+            - .env
+        depends_on:
+            - wordpress
+        restart: on-failure
+        volumes:
+            - wordpress:/var/www/wordpress
+
 networks:
     inceptionnetwork:
         driver: bridge
