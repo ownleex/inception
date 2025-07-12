@@ -1,13 +1,14 @@
 FROM debian:bullseye
 
-# Installer vsftpd et les outils de debug
+# Installer vsftpd et les outils nécessaires
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y vsftpd netstat-nat procps && \
+    apt-get install -y vsftpd cron && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Créer les répertoires nécessaires
 RUN mkdir -p /var/run/vsftpd/empty && \
-    mkdir -p /var/log
+    mkdir -p /var/log && \
+    mkdir -p /var/www
 
 # Copier les fichiers de configuration
 COPY conf/vsftpd.conf /etc/vsftpd.conf
