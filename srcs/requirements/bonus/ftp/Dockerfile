@@ -15,13 +15,7 @@ RUN echo 'listen=YES' >> /etc/vsftpd.conf && \
     echo 'allow_writeable_chroot=YES' >> /etc/vsftpd.conf && \
     echo 'pasv_enable=YES' >> /etc/vsftpd.conf && \
     echo 'pasv_min_port=21000' >> /etc/vsftpd.conf && \
-    echo 'pasv_max_port=21010' >> /etc/vsftpd.conf && \
-    echo 'local_umask=000' >> /etc/vsftpd.conf && \
-    echo 'file_open_mode=0777' >> /etc/vsftpd.conf && \
-    echo 'dirmessage_enable=YES' >> /etc/vsftpd.conf && \
-    echo 'use_localtime=YES' >> /etc/vsftpd.conf && \
-    echo 'xferlog_enable=YES' >> /etc/vsftpd.conf && \
-    echo 'connect_from_port_20=YES' >> /etc/vsftpd.conf
+    echo 'pasv_max_port=21010' >> /etc/vsftpd.conf
 
 # Créer les répertoires nécessaires
 RUN mkdir -p /var/run/vsftpd/empty
