@@ -6,6 +6,7 @@ RUN apt-get update -y && apt-get upgrade -y && \
       php7.4-fpm \
       php7.4-mysql \
       php7.4-gd \
+      php-redis \
       wget \
       mariadb-client
 

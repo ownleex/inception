@@ -69,6 +69,14 @@ services:
             - mariadb
         restart: on-failure
 
+    redis:
+        container_name: redis
+        build: requirements/bonus/redis
+        networks:
+            - inceptionnetwork
+        restart: on-failure
+
+
 networks:
     inceptionnetwork:
         driver: bridge
