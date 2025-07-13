@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 # Vérifier les permissions
 chown -R mysql:mysql /var/lib/mysql
 

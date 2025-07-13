@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 # Créer l'utilisateur FTP
 if ! id "$FTP_USER" &>/dev/null; then
     echo "Création de l'utilisateur FTP: $FTP_USER"
