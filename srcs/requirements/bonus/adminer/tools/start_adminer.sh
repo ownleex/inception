@@ -1,24 +1,32 @@
 #!/bin/bash
 
-# Supprimer la page par défaut d'Apache
-rm -f /var/www/html/index.html
+echo "=== Démarrage d'Adminer ==="
 
-# Configuration d'Apache pour le port 8080
-sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf
-sed -i 's/<VirtualHost \*:80>/<VirtualHost *:8080>/' /etc/apache2/sites-available/000-default.conf
+# Vérification que le fichier Adminer existe
+if [ ! -f index.php ]; then
+    echo "❌ Erreur: Fichier Adminer non trouvé !"
+    exit 1
+fi
 
-# Configurer DirectoryIndex pour prioriser index.php
-echo "DirectoryIndex index.php index.html" >> /etc/apache2/apache2.conf
+echo "✅ Fichier Adminer trouvé"
 
-# Activer le module PHP
-a2enmod php7.4
+# Optionnel : Attendre que MariaDB soit prêt
+echo "⏳ Attente de MariaDB..."
+timeout=30
+while ! nc -z mariadb 3306 2>/dev/null && [ $timeout -gt 0 ]; do
+    echo "   MariaDB pas encore prêt, attente... ($timeout)"
+    sleep 2
+    timeout=$((timeout-2))
+done
 
-# S'assurer que les permissions sont correctes
-chown -R www-data:www-data /var/www/html
-chmod -R 755 /var/www/html
+if [ $timeout -le 0 ]; then
+    echo "⚠️  Attention: MariaDB ne répond pas, mais démarrage d'Adminer quand même"
+else
+    echo "✅ MariaDB est prêt !"
+fi
 
-echo "Démarrage d'Adminer sur le port 8080..."
-echo "Adminer devrait être accessible via http://localhost:8080"
+echo "🚀 Démarrage du serveur PHP pour Adminer sur 0.0.0.0:8080..."
+echo "🌐 Adminer sera accessible via http://localhost:8080"
 
-# Démarrer Apache en premier plan
-exec apache2ctl -D FOREGROUND
+# Démarrer le serveur PHP intégré
+exec php -S 0.0.0.0:8080
