@@ -5,9 +5,6 @@ mkdir -p /run/php
 chown -R www-data:www-data /run/php
 chown -R www-data:www-data /var/www/wordpress
 
-# Supprimer un object-cache.php potentiellement invalide
-rm -f /var/www/wordpress/wp-content/object-cache.php
-
 # Créer wp-config.php depuis le sample s'il n'existe pas
 if [ ! -f /var/www/wordpress/wp-config.php ]; then
     cp /var/www/wordpress/wp-config-sample.php /var/www/wordpress/wp-config.php
@@ -28,13 +25,11 @@ fi
 sed -i "s/localhost/mariadb/g" /var/www/wordpress/wp-config.php
 
 # Configuration Redis dans wp-config.php
-# Avant le require_wp_settings, injecter les defines Redis
 sed -i "/require_once ABSPATH .*wp-settings.php/i \
 define( 'WP_REDIS_HOST', 'redis' );\
 define( 'WP_REDIS_PORT', 6379 );\
-if ( ! class_exists( 'Redis' ) ) { define( 'WP_REDIS_DISABLED', true ); }" \
+define( 'WP_REDIS_DISABLED', true );" \
     /var/www/wordpress/wp-config.php
-
 
 # Attente de MariaDB
 echo "Attente de la base de données..."
@@ -66,8 +61,6 @@ else
     echo "WordPress est déjà installé."
 fi
 
-
-
 # Installation + activation plugin Redis
 echo "Installation et activation du plugin Redis Cache..."
 wp plugin install redis-cache --activate --allow-root --path=/var/www/wordpress
@@ -77,10 +70,6 @@ wp redis enable --allow-root --path=/var/www/wordpress
 echo "Installation du thème AnyNews ..."
 wp theme install anynews --allow-root --path=/var/www/wordpress --activate
 echo "Thème AnyNews activé avec succès !"
-
-# Permissions finales
-chown -R www-data:www-data /var/www/wordpress/wp-content/uploads
-chown -R www-data:www-data /var/www/wordpress/wp-content/upgrade
 
 # Démarrer PHP-FPM
 echo "Démarrage de PHP-FPM..."
