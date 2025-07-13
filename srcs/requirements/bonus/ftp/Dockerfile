@@ -4,7 +4,6 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y vsftpd && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Configuration vsftpd plus permissive pour debug
 RUN echo 'listen=YES' >> /etc/vsftpd.conf && \
     echo 'listen_ipv6=NO' >> /etc/vsftpd.conf && \
     echo 'background=NO' >> /etc/vsftpd.conf && \
@@ -16,9 +15,6 @@ RUN echo 'listen=YES' >> /etc/vsftpd.conf && \
     echo 'pasv_enable=YES' >> /etc/vsftpd.conf && \
     echo 'pasv_min_port=21000' >> /etc/vsftpd.conf && \
     echo 'pasv_max_port=21010' >> /etc/vsftpd.conf
-
-# Créer les répertoires nécessaires
-RUN mkdir -p /var/run/vsftpd/empty
 
 COPY tools/ftp_setup.sh /usr/local/bin/setup_ftp.sh
 RUN chmod +x /usr/local/bin/setup_ftp.sh
