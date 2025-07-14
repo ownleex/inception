@@ -28,7 +28,7 @@ sed -i "s/localhost/mariadb/g" /var/www/wordpress/wp-config.php
 sed -i "/require_once ABSPATH .*wp-settings.php/i \
 define( 'WP_REDIS_HOST', 'redis' );\
 define( 'WP_REDIS_PORT', 6379 );\
-define( 'WP_REDIS_DISABLED', true );" \
+if ( ! class_exists( 'Redis' ) ) { define( 'WP_REDIS_DISABLED', true ); }" \
     /var/www/wordpress/wp-config.php
 
 # Attente de MariaDB
