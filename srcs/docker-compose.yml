@@ -87,7 +87,20 @@ services:
             - "8081:80"
         restart: on-failure
 
-
+    cadvisor:
+        container_name: cadvisor
+        build: requirements/bonus/cadvisor
+        networks:
+            - inceptionnetwork
+        ports:
+            - "8082:8080"
+        volumes:
+            - /:/rootfs:ro
+            - /var/run:/var/run:ro
+            - /sys:/sys:ro
+            - /var/lib/docker/:/var/lib/docker:ro
+        restart: on-failure
+        privileged: true
 
 networks:
     inceptionnetwork:
