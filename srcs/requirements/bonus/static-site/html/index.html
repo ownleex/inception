@@ -1,10 +1,421 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Hello World</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - Développeur 42</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 80px 0;
+            color: white;
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #fff;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: #667eea;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: white;
+            margin: 40px 0;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transform: translateY(20px);
+            animation: slideUp 0.8s ease forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .skill-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+
+        .skill-card:hover {
+            transform: scale(1.05);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .project-card {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .project-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+        }
+
+        .project-body {
+            padding: 20px;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .contact-card {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .docker-badge {
+            background: #0db7ed;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .tech-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .bonus-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .bonus-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+
+        .bonus-card:hover {
+            transform: scale(1.03);
+        }
+
+        .security-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .security-list li {
+            background: #e8f5e8;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+
+        .tech-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .tech-badge {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .project-detail h3 {
+            color: #667eea;
+            margin: 30px 0 15px 0;
+            font-size: 1.3em;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .section {
+                margin: 20px 0;
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello World!</h1>
+    <div class="container">
+        <header>
+            <div class="profile-img">👨‍💻</div>
+            <h1>Alexandre Yarmayan</h1>
+            <p class="subtitle">Étudiant Développeur @ École 42</p>
+            <div style="margin-top: 20px;">
+                <span class="docker-badge">🐳 Docker</span>
+                <span class="docker-badge">🌐 DevOps</span>
+                <span class="docker-badge">💻 Full Stack</span>
+            </div>
+        </header>
+
+        <div class="section">
+            <h2>🚀 À Propos</h2>
+            <p>Passionné par le développement et l'infrastructure, je suis actuellement étudiant à l'École 42. Ce site fait partie du projet <strong>Inception</strong>, où j'ai appris à maîtriser Docker, docker-compose, et la containerisation d'applications web.</p>
+        </div>
+
+        <div class="section">
+            <h2>🛠️ Compétences Techniques</h2>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <h3>🐳 Docker</h3>
+                    <p>Containerisation et orchestration</p>
+                </div>
+                <div class="skill-card">
+                    <h3>🌐 Web</h3>
+                    <p>NGINX, WordPress, MariaDB</p>
+                </div>
+                <div class="skill-card">
+                    <h3>🔒 SSL/TLS</h3>
+                    <p>Certificats et sécurité</p>
+                </div>
+                <div class="skill-card">
+                    <h3>🐧 Linux</h3>
+                    <p>Administration système</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🏗️ Projet Inception</h2>
+            <div class="project-detail">
+                <h3>📋 Description du Projet</h3>
+                <p>Inception est un projet d'administration système visant à créer une infrastructure complète avec Docker. L'objectif est de containeriser et orchestrer différents services web dans un environnement sécurisé et performant.</p>
+                
+                <h3>🔧 Architecture Technique</h3>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <h4>🌐 NGINX</h4>
+                        <p>Serveur web avec SSL/TLS (TLSv1.2/1.3) sur le port 443</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>📝 WordPress</h4>
+                        <p>CMS avec PHP-FPM, installation automatisée via WP-CLI</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>🗄️ MariaDB</h4>
+                        <p>Base de données avec utilisateurs configurés automatiquement</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>🐳 Docker</h4>
+                        <p>Containerisation avec docker-compose et volumes persistants</p>
+                    </div>
+                </div>
+
+                <h3>⭐ Services Bonus Implémentés</h3>
+                <div class="bonus-grid">
+                    <div class="bonus-card">
+                        <h4>🚀 Redis Cache</h4>
+                        <p>Cache pour WordPress avec plugin Redis Cache activé pour optimiser les performances</p>
+                    </div>
+                    <div class="bonus-card">
+                        <h4>📁 Serveur FTP</h4>
+                        <p>vsftpd configuré pour l'accès aux fichiers WordPress (ports 21 et 21000-21010)</p>
+                    </div>
+                    <div class="bonus-card">
+                        <h4>🌐 Site Statique</h4>
+                        <p>Ce portfolio ! Site HTML déployé avec NGINX (port 8081)</p>
+                    </div>
+                    <div class="bonus-card">
+                        <h4>🛠️ Adminer</h4>
+                        <p>Interface web pour administrer la base de données MariaDB (port 8080)</p>
+                    </div>
+                    <div class="bonus-card">
+                        <h4>📊 cAdvisor</h4>
+                        <p>Monitoring des containers Docker en temps réel (port 8082)</p>
+                    </div>
+                </div>
+
+                <h3>🔒 Sécurité & Configuration</h3>
+                <ul class="security-list">
+                    <li>🔐 Certificats SSL/TLS auto-signés avec OpenSSL</li>
+                    <li>🌐 Réseau Docker dédié pour l'isolation des services</li>
+                    <li>📂 Volumes persistants dans <code>/home/ayarmaya/data/</code></li>
+                    <li>🔑 Variables d'environnement via fichier .env</li>
+                </ul>
+
+                <h3>🛠️ Technologies Utilisées</h3>
+                <div class="tech-badges">
+                    <span class="tech-badge">Docker</span>
+                    <span class="tech-badge">docker-compose</span>
+                    <span class="tech-badge">NGINX</span>
+                    <span class="tech-badge">WordPress</span>
+                    <span class="tech-badge">PHP-FPM</span>
+                    <span class="tech-badge">MariaDB</span>
+                    <span class="tech-badge">Redis</span>
+                    <span class="tech-badge">vsftpd</span>
+                    <span class="tech-badge">SSL/TLS</span>
+                    <span class="tech-badge">Adminer</span>
+                    <span class="tech-badge">cAdvisor</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📧 Contact</h2>
+            <div class="contact-info">
+                <div class="contact-card">
+                    <h3>📧 Email</h3>
+                    <p>ayarmayan@student.42nice.fr</p>
+                </div>
+                <div class="contact-card">
+                    <h3>🐙 GitHub</h3>
+                    <p>github.com/ownleex</p>
+                </div>
+                <div class="contact-card">
+                    <h3>💼 LinkedIn</h3>
+                    <p>Alexandre Yarmayan</p>
+                </div>
+                <div class="contact-card">
+                    <h3>🏫 École 42</h3>
+                    <p>Login: ayarmaya</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2024 - Site statique déployé avec Docker 🐳</p>
+            <p>Projet Inception - École 42</p>
+        </footer>
+    </div>
+
+    <script>
+        // Animation simple au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('.section');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            sections.forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(section);
+            });
+        });
+
+        // Effet de hover sur les cartes de compétences
+        document.querySelectorAll('.skill-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05) rotate(1deg)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1) rotate(0deg)';
+            });
+        });
+    </script>
 </body>
 </html>
