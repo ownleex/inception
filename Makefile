@@ -1,4 +1,3 @@
-# Variable pour le chemin des données avec valeur par défaut
 VOLPATH		= $(HOME)/data
 DOCKPATH	= ./srcs/docker-compose.yml
 DOMAIN		= ayarmaya.42.fr
