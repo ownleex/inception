@@ -74,6 +74,8 @@ services:
         build: requirements/bonus/redis
         networks:
             - inceptionnetwork
+        ports:
+            - "6379:6379"
         restart: on-failure
 
 
