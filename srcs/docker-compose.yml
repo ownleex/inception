@@ -102,6 +102,18 @@ services:
         restart: on-failure
         privileged: true
 
+    portainer:
+        container_name: portainer
+        build: requirements/bonus/portainer
+        networks:
+            - inceptionnetwork
+        ports:
+            - "9000:9000"
+            - "9443:9443"
+        volumes:
+            - portainer:/data
+        restart: on-failure
+
 networks:
     inceptionnetwork:
         driver: bridge
@@ -119,3 +131,9 @@ volumes:
             type: 'none'
             o: 'bind'
             device: '${HOME}/data/wordpress/'
+    portainer:
+        driver: local
+        driver_opts:
+            type: 'none'
+            o: 'bind'
+            device: '${HOME}/data/portainer/'

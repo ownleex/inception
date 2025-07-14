@@ -6,8 +6,10 @@ all : add-host
 	@echo "Création des dossiers dans: $(VOLPATH)"
 	@sudo mkdir -p $(VOLPATH)/mariadb
 	@sudo mkdir -p $(VOLPATH)/wordpress
+	@sudo mkdir -p $(VOLPATH)/portainer
 	@sudo chmod 777 $(VOLPATH)/mariadb
 	@sudo chmod 777 $(VOLPATH)/wordpress
+	@sudo chmod 777 $(VOLPATH)/portainer
 	@HOME=$(HOME) sudo -E docker-compose -f $(DOCKPATH) up -d
 
 clean : remove-host
