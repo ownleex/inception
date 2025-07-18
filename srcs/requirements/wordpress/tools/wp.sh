@@ -11,14 +11,14 @@ if [ ! -f /var/www/wordpress/wp-config.php ]; then
 fi
 
 # Configuration de la base de données dans wp-config.php
-if [ -n "$DB_NAME" ]; then
-	sed -i "s/database_name_here/$DB_NAME/g" /var/www/wordpress/wp-config.php
-	if [ -n "$DB_USER" ]; then
-		sed -i "s/username_here/$DB_USER/g" /var/www/wordpress/wp-config.php
-		if [ -n "$DB_PASSWORD" ]; then
-    		sed -i "s/password_here/$DB_PASSWORD/g" /var/www/wordpress/wp-config.php
-		fi
-	fi
+if [ -n "$DB_NAME" ] && [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+    echo "✅ Toutes les variables DB sont définies, configuration complète..."
+    sed -i "s/database_name_here/$DB_NAME/g" /var/www/wordpress/wp-config.php
+    sed -i "s/username_here/$DB_USER/g" /var/www/wordpress/wp-config.php
+    sed -i "s/password_here/$DB_PASSWORD/g" /var/www/wordpress/wp-config.php
+else
+    echo "⚠️  Une ou plusieurs variables DB manquantes, configuration partielle..."
+    exit 1
 fi
 
 # Pointage vers le container mariadb
