@@ -3,7 +3,6 @@
 # Créer les dossiers nécessaires
 mkdir -p /run/php
 chown -R www-data:www-data /run/php
-chown -R www-data:www-data /var/www/wordpress
 
 # Créer wp-config.php depuis le sample s'il n'existe pas
 if [ ! -f /var/www/wordpress/wp-config.php ]; then
@@ -26,8 +25,8 @@ sed -i "s/localhost/mariadb/g" /var/www/wordpress/wp-config.php
 
 # Configuration Redis dans wp-config.php
 sed -i "/require_once ABSPATH .*wp-settings.php/i \
-define( 'WP_REDIS_HOST', 'redis' );\
-define( 'WP_REDIS_PORT', 6379 );\
+define( 'WP_REDIS_HOST', 'redis' );\n\
+define( 'WP_REDIS_PORT', 6379 );\n\
 if ( ! class_exists( 'Redis' ) ) { define( 'WP_REDIS_DISABLED', true ); }" \
     /var/www/wordpress/wp-config.php
 
@@ -60,6 +59,12 @@ if ! wp core is-installed --allow-root --path=/var/www/wordpress; then
 else
     echo "WordPress est déjà installé."
 fi
+
+# Permissions spécifiques pour Redis
+echo "Configuration des permissions pour Redis..."
+chown -R www-data:www-data /var/www/wordpress
+chmod -R 775 /var/www/wordpress/wp-content
+
 
 # Installation + activation plugin Redis
 echo "Installation et activation du plugin Redis Cache..."
