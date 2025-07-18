@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Créer les dossiers nécessaires
-mkdir -p /run/php
-chown -R www-data:www-data /run/php
-
 # Créer wp-config.php depuis le sample s'il n'existe pas
 if [ ! -f /var/www/wordpress/wp-config.php ]; then
     cp /var/www/wordpress/wp-config-sample.php /var/www/wordpress/wp-config.php
