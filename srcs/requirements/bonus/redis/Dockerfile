@@ -7,4 +7,4 @@ RUN apt-get update && \
 COPY tools/start_redis.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start_redis.sh
 
-CMD ["start_redis.sh"]
+ENTRYPOINT ["start_redis.sh"]

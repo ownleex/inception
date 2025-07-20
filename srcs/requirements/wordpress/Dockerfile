@@ -23,4 +23,4 @@ COPY /conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 
 RUN chmod +x /etc/conf/wp.sh
 
-CMD ["bash", "/etc/conf/wp.sh"]
+ENTRYPOINT ["bash", "/etc/conf/wp.sh"]
