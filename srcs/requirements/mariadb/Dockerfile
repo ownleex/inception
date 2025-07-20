@@ -9,4 +9,4 @@ RUN mkdir -p /var/run/mysqld && chown -R mysql:mysql /var/run/mysqld
 
 RUN chmod +x /usr/local/bin/init_db.sh
 
-ENTRYPOINT ["bash", "/usr/local/bin/init_db.sh"]
+ENTRYPOINT ["/usr/local/bin/init_db.sh"]

@@ -12,7 +12,7 @@ if [ -n "$DB_NAME" ] && [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
     sed -i "s/username_here/$DB_USER/g" /var/www/wordpress/wp-config.php
     sed -i "s/password_here/$DB_PASSWORD/g" /var/www/wordpress/wp-config.php
 else
-    echo "⚠️  Une ou plusieurs variables DB manquantes, configuration partielle..."
+    echo "⚠️ Une ou plusieurs variables DB manquantes, configuration partielle..."
     exit 1
 fi
 
