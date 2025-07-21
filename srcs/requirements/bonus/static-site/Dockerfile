@@ -7,6 +7,4 @@ RUN apt-get update && \
 
 COPY html/ /var/www/html/
 
-EXPOSE 80
-
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
