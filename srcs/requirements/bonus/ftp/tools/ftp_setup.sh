@@ -5,10 +5,6 @@ if ! id "$FTP_USER" &>/dev/null; then
     echo "Création de l'utilisateur FTP: $FTP_USER"
     useradd -m -d /var/www/wordpress -s /bin/bash "$FTP_USER"
     echo "$FTP_USER:$FTP_PASSWORD" | chpasswd
-else
-    echo "L'utilisateur $FTP_USER existe déjà"
-    echo "$FTP_USER:$FTP_PASSWORD" | chpasswd
-    usermod -d /var/www/wordpress "$FTP_USER"
 fi
 
 # Ajouter aux groupes nécessaires
