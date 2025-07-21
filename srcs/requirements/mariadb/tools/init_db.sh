@@ -2,12 +2,7 @@
 
 # Vérifier les permissions
 chown -R mysql:mysql /var/lib/mysql
-
-# Initialisation manuelle de la base si nécessaire
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-    echo "Initialisation de la base de données..."
-    mysql_install_db --user=mysql --datadir=/var/lib/mysql > /dev/null
-fi
+chown -R mysql:mysql /var/run/mysqld
 
 # Préparer un script SQL à injecter lors du démarrage
 cat << EOF > /tmp/init.sql
