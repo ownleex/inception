@@ -2,7 +2,6 @@
 
 # Vérifier les permissions
 chown -R mysql:mysql /var/lib/mysql
-chown -R mysql:mysql /var/run/mysqld
 
 # Préparer un script SQL à injecter lors du démarrage
 cat << EOF > /tmp/init.sql
