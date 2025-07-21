@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Vérifier les permissions
-chown -R mysql:mysql /var/lib/mysql
-
 # Préparer un script SQL à injecter lors du démarrage
 cat << EOF > /tmp/init.sql
 CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;
