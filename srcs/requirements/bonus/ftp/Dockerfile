@@ -1,8 +1,7 @@
 FROM debian:bullseye
 
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y vsftpd && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    apt-get install -y vsftpd
 
 RUN echo 'listen=YES' >> /etc/vsftpd.conf && \
     echo 'listen_ipv6=NO' >> /etc/vsftpd.conf && \

@@ -2,9 +2,7 @@ FROM debian:bullseye
 
 # Installation des paquets nécessaires
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y wget php php-mysql && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y wget php php-mysql
 
 # Créer le répertoire de travail
 RUN mkdir -p /var/www

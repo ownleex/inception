@@ -1,9 +1,7 @@
 FROM debian:bullseye
 
 RUN apt-get update && \
-    apt-get install -y nginx && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y nginx
 
 COPY html/ /var/www/html/
 

@@ -2,9 +2,7 @@ FROM debian:bullseye
 
 # 1. Installer les dépendances
 RUN apt-get update && \
-    apt-get install -y wget ca-certificates unzip libcap2-bin curl && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y wget ca-certificates unzip libcap2-bin curl
 
 # 2. Télécharger cAdvisor et lui donner les bonnes capacités
 RUN wget https://github.com/google/cadvisor/releases/download/v0.47.2/cadvisor-v0.47.2-linux-amd64 \
