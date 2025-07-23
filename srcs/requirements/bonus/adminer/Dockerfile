@@ -12,5 +12,4 @@ RUN chmod +x /usr/local/bin/start_adminer.sh
 
 WORKDIR /var/www
 
-# Point d'entrée
-ENTRYPOINT ["/usr/local/bin/start_adminer.sh"]
+ENTRYPOINT ["start_adminer.sh"]

@@ -18,4 +18,4 @@ RUN echo 'listen=YES' >> /etc/vsftpd.conf && \
 COPY tools/ftp_setup.sh /usr/local/bin/setup_ftp.sh
 RUN chmod +x /usr/local/bin/setup_ftp.sh
 
-ENTRYPOINT ["/usr/local/bin/setup_ftp.sh"]
+ENTRYPOINT ["setup_ftp.sh"]
