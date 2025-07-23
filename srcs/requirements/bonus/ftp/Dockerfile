@@ -18,6 +18,4 @@ RUN echo 'listen=YES' >> /etc/vsftpd.conf && \
 COPY tools/ftp_setup.sh /usr/local/bin/setup_ftp.sh
 RUN chmod +x /usr/local/bin/setup_ftp.sh
 
-EXPOSE 21 20 21000-21010
-
 ENTRYPOINT ["/usr/local/bin/setup_ftp.sh"]
