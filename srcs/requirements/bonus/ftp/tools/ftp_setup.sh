@@ -9,7 +9,7 @@ echo "$FTP_USER:$FTP_PASSWORD" | chpasswd
 usermod -a -G www-data "$FTP_USER"
 
 # Permissions spéciales pour wp-content
-chmod -R 777 /var/www/wordpress
+chmod -R 775 /var/www/wordpress
 chown -R "$FTP_USER:$FTP_USER" /var/www/wordpress
 
 # Créer les répertoires vsftpd
