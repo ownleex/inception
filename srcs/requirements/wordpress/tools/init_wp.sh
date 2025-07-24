@@ -51,26 +51,21 @@ if ! wp core is-installed --allow-root --path=/var/www/wordpress; then
         --role=$WP_ROLE \
         --user_pass=$WP_USERPASSWORD
 
+    echo "Installation et activation du plugin Redis Cache..."
+    wp plugin install redis-cache --activate --allow-root --path=/var/www/wordpress
+    wp redis enable --allow-root --path=/var/www/wordpress
+
+    echo "Installation du thème AnyNews ..."
+    wp theme install anynews --allow-root --path=/var/www/wordpress --activate
+    echo "Thème AnyNews activé avec succès !"
+
     echo "WordPress installé avec succès !"
 else
     echo "WordPress est déjà installé."
 fi
 
-# Permissions spécifiques pour Redis
-echo "Configuration des permissions pour Redis..."
 chown -R www-data:www-data /var/www/wordpress
 chmod -R 775 /var/www/wordpress/wp-content
-
-
-# Installation + activation plugin Redis
-echo "Installation et activation du plugin Redis Cache..."
-wp plugin install redis-cache --activate --allow-root --path=/var/www/wordpress
-wp redis enable --allow-root --path=/var/www/wordpress
-
-# Installation et activation du thème AnyNews
-echo "Installation du thème AnyNews ..."
-wp theme install anynews --allow-root --path=/var/www/wordpress --activate
-echo "Thème AnyNews activé avec succès !"
 
 # Démarrer PHP-FPM
 echo "Démarrage de PHP-FPM..."
