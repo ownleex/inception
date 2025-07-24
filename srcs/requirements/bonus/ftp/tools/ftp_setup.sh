@@ -23,4 +23,4 @@ echo "local_root=/var/www/wordpress" >> /etc/vsftpd.conf
 echo "hide_ids=NO" >> /etc/vsftpd.conf
 
 echo "Démarrage de vsftpd..."
-exec /usr/sbin/vsftpd /etc/vsftpd.conf
+exec vsftpd /etc/vsftpd.conf

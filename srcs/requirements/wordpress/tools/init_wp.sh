@@ -74,4 +74,4 @@ echo "Thème AnyNews activé avec succès !"
 
 # Démarrer PHP-FPM
 echo "Démarrage de PHP-FPM..."
-exec /usr/sbin/php-fpm7.4 -F -R
+exec php-fpm7.4 -F -R

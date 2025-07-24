@@ -8,4 +8,4 @@ RUN wget https://github.com/google/cadvisor/releases/download/v0.47.2/cadvisor-v
     chmod +x /usr/local/bin/cadvisor && \
     setcap cap_sys_admin+ep /usr/local/bin/cadvisor
 
-ENTRYPOINT ["cadvisor", "--logtostderr", "--port=8080"]
+ENTRYPOINT ["cadvisor", "--port=8080"]
