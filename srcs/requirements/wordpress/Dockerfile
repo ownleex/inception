@@ -18,9 +18,9 @@ RUN	wget https://fr.wordpress.org/latest-fr_FR.tar.gz -P /var/www && \
 	cd /var/www && tar -xzf latest-fr_FR.tar.gz && rm latest-fr_FR.tar.gz && \
 	chown -R www-data:www-data /var/www/wordpress
 
-COPY /tools/wp.sh /etc/conf/
+COPY /tools/wp.sh /usr/local/bin/wp.sh
+RUN chmod +x /usr/local/bin/wp.sh
+
 COPY /conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 
-RUN chmod +x /etc/conf/wp.sh
-
-ENTRYPOINT ["/etc/conf/wp.sh"]
+ENTRYPOINT ["wp.sh"]
