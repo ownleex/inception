@@ -7,9 +7,6 @@ RUN mkdir -p /var/www
 
 RUN wget -O /var/www/index.php https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1.php
 
-COPY ./tools/start_adminer.sh /usr/local/bin/start_adminer.sh
-RUN chmod +x /usr/local/bin/start_adminer.sh
-
 WORKDIR /var/www
 
-ENTRYPOINT ["start_adminer.sh"]
+ENTRYPOINT ["php", "-S", "0.0.0.0:8080"]
