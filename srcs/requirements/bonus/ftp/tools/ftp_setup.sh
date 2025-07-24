@@ -17,10 +17,22 @@ mkdir -p /var/run/vsftpd/empty
 mkdir -p /var/log
 touch /var/log/vsftpd.log
 
-# Configuration vsftpd supplémentaire
-echo "user_sub_token=$FTP_USER" >> /etc/vsftpd.conf
-echo "local_root=/var/www/wordpress" >> /etc/vsftpd.conf
-echo "hide_ids=NO" >> /etc/vsftpd.conf
+cat > /etc/vsftpd.conf << EOF
+listen=YES
+listen_ipv6=NO
+background=NO
+anonymous_enable=NO
+local_enable=YES
+write_enable=YES
+chroot_local_user=YES
+allow_writeable_chroot=YES
+pasv_enable=YES
+pasv_min_port=21000
+pasv_max_port=21010
+user_sub_token=$FTP_USER
+local_root=/var/www/wordpress
+hide_ids=NO
+EOF
 
 echo "Démarrage de vsftpd..."
 exec vsftpd /etc/vsftpd.conf
