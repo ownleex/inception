@@ -1,11 +1,9 @@
 #!/bin/bash
 
-# Créer wp-config.php depuis le sample s'il n'existe pas
 if [ ! -f /var/www/wordpress/wp-config.php ]; then
     cp /var/www/wordpress/wp-config-sample.php /var/www/wordpress/wp-config.php
 fi
 
-# Configuration de la base de données dans wp-config.php
 if ! grep -q "mariadb" /var/www/wordpress/wp-config.php; then
     if [ -n "$DB_NAME" ] && [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
         echo "✅ Toutes les variables DB sont définies, configuration complète..."
@@ -19,20 +17,20 @@ if ! grep -q "mariadb" /var/www/wordpress/wp-config.php; then
     fi
 fi
 
-# Attente de MariaDB
 echo "Attente de la base de données..."
 until wp db check --allow-root --path=/var/www/wordpress; do
     sleep 5
     echo "Retry database connection..."
 done
 
-# Installation de WordPress
 if ! wp core is-installed --allow-root --path=/var/www/wordpress; then
-    # Configuration Redis dans wp-config.php
+
+    echo "Configuration Redis dans wp-config.php"
     sed -i "/require_once ABSPATH .*wp-settings.php/i \
     define( 'WP_REDIS_HOST', 'redis' );\n\
     define( 'WP_REDIS_PORT', 6379 );" \
         /var/www/wordpress/wp-config.php
+
     echo "Installation de WordPress..."
     wp core install --allow-root \
         --path=$WP_PATHWORDPRESS \
@@ -64,6 +62,5 @@ fi
 chown -R www-data:www-data /var/www/wordpress
 chmod -R 775 /var/www/wordpress/wp-content
 
-# Démarrer PHP-FPM
 echo "Démarrage de PHP-FPM..."
 exec php-fpm7.4 -F -R
