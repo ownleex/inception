@@ -6,24 +6,18 @@ if [ ! -f /var/www/wordpress/wp-config.php ]; then
 fi
 
 # Configuration de la base de données dans wp-config.php
-if [ -n "$DB_NAME" ] && [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
-    echo "✅ Toutes les variables DB sont définies, configuration complète..."
-    sed -i "s/database_name_here/$DB_NAME/g" /var/www/wordpress/wp-config.php
-    sed -i "s/username_here/$DB_USER/g" /var/www/wordpress/wp-config.php
-    sed -i "s/password_here/$DB_PASSWORD/g" /var/www/wordpress/wp-config.php
-else
-    echo "⚠️ Une ou plusieurs variables DB manquantes, configuration partielle..."
-    exit 1
+if ! grep -q "mariadb" /var/www/wordpress/wp-config.php; then
+    if [ -n "$DB_NAME" ] && [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+        echo "✅ Toutes les variables DB sont définies, configuration complète..."
+        sed -i "s/database_name_here/$DB_NAME/g" /var/www/wordpress/wp-config.php
+        sed -i "s/username_here/$DB_USER/g" /var/www/wordpress/wp-config.php
+        sed -i "s/password_here/$DB_PASSWORD/g" /var/www/wordpress/wp-config.php
+        sed -i "s/localhost/mariadb/g" /var/www/wordpress/wp-config.php
+    else
+        echo "⚠️ Une ou plusieurs variables DB manquantes, configuration partielle..."
+        exit 1
+    fi
 fi
-
-# Pointage vers le container mariadb
-sed -i "s/localhost/mariadb/g" /var/www/wordpress/wp-config.php
-
-# Configuration Redis dans wp-config.php
-sed -i "/require_once ABSPATH .*wp-settings.php/i \
-define( 'WP_REDIS_HOST', 'redis' );\n\
-define( 'WP_REDIS_PORT', 6379 );" \
-    /var/www/wordpress/wp-config.php
 
 # Attente de MariaDB
 echo "Attente de la base de données..."
@@ -34,6 +28,11 @@ done
 
 # Installation de WordPress
 if ! wp core is-installed --allow-root --path=/var/www/wordpress; then
+    # Configuration Redis dans wp-config.php
+    sed -i "/require_once ABSPATH .*wp-settings.php/i \
+    define( 'WP_REDIS_HOST', 'redis' );\n\
+    define( 'WP_REDIS_PORT', 6379 );" \
+        /var/www/wordpress/wp-config.php
     echo "Installation de WordPress..."
     wp core install --allow-root \
         --path=$WP_PATHWORDPRESS \
