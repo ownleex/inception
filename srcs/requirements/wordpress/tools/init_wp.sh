@@ -26,7 +26,7 @@ done
 if ! wp core is-installed --allow-root --path=/var/www/wordpress; then
 
     echo "Configuration Redis dans wp-config.php"
-    sed -i "/require_once ABSPATH .*wp-settings.php/i \
+    sed -i "/require_once ABSPATH/i \
     define( 'WP_REDIS_HOST', 'redis' );\n\
     define( 'WP_REDIS_PORT', 6379 );" \
         /var/www/wordpress/wp-config.php
