@@ -9,4 +9,5 @@ RUN wget -O /var/www/index.php https://github.com/vrana/adminer/releases/downloa
 
 WORKDIR /var/www
 
+# -S pour lancer PHP en mode serveur web
 ENTRYPOINT ["php", "-S", "0.0.0.0:8080"]
