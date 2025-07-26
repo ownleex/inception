@@ -60,7 +60,7 @@ else
 fi
 
 chown -R www-data:www-data /var/www/wordpress
-chmod -R 775 /var/www/wordpress/wp-content
+chmod -R 775 /var/www/wordpress
 
 echo "Démarrage de PHP-FPM..."
 exec php-fpm7.4 -F -R
