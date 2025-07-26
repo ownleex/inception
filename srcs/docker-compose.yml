@@ -95,10 +95,10 @@ services:
         ports:
             - "8082:8080"
         volumes:
-            - /:/rootfs:ro
-            - /var/run:/var/run:ro
-            - /sys:/sys:ro
-            - /var/lib/docker/:/var/lib/docker:ro
+            - /:/rootfs:ro                              # Système de fichiers racine
+            - /var/run:/var/run:ro                      # Socket Docker et autres processus
+            - /sys:/sys:ro                              # Système de fichiers virtuel (infos kernel)
+            - /var/lib/docker/:/var/lib/docker:ro       # Données Docker
         restart: on-failure
         privileged: true
 
